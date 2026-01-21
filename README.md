@@ -36,3 +36,25 @@ Crea un archivo `.env` en la raíz de la carpeta `/backend`:
 ```env
 PORT=3000
 KEYS=tu_palabra_secreta
+
+### 2. Credenciales de Firebase
+Asegúrate de que el archivo keys.json esté ubicado en la raíz principal del proyecto (fuera de las carpetas de frontend y backend).
+
+### 3. Ejecución del Proyecto
+Bash
+
+# Terminal 1: Backend
+cd backend
+npm install
+node index
+
+# Terminal 2: Frontend
+cd frontend
+npm install
+npm run dev
+🔒 Características de Seguridad
+Protección de Datos: No se almacenan contraseñas en texto plano; se utiliza un sistema de Hash y Salt único por usuario.
+
+Integridad: Validaciones estrictas en el servidor mediante expresiones regulares para correos, teléfonos y nombres.
+
+Persistencia: Manejo de sesiones seguras que diferencian entre usuarios estándar y administradores.
