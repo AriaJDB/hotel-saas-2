@@ -28,31 +28,39 @@ Interfaz moderna y eficiente:
 * **Seguridad**: Hashing de contraseñas con `crypto.scryptSync`.
 
 
-
 ## 🚀 Instalación y Configuración
 
-### 1. Variables de Entorno
-Crea un archivo `.env` en la raíz de la carpeta `/backend`:
-```env
-PORT=3000
-KEYS=tu_palabra_secreta
-```
+### 1. Credenciales de Firebase
+Asegúrate de que el archivo `keys.json` esté ubicado en la raíz principal del proyecto (fuera de las carpetas de frontend y backend).
 
-### 2. Credenciales de Firebase
-Asegúrate de que el archivo keys.json esté ubicado en la raíz principal del proyecto (fuera de las carpetas de frontend y backend).
-
-### 3. Ejecución del Proyecto
+### 2. Ejecución del Proyecto
 Bash
 
 # Terminal 1: Backend
-cd backend
+Asegurarse de estar en \hotel-saas-2\backend y ejecutar
+```
 npm install
+npm install express-session
+npm install firebase-admin
+npm install cors
+npm install dotenv
+```
+
+Para arrancar el servidor ejecutar
+```
 node index
+```
 
 # Terminal 2: Frontend
-cd frontend
+Asegurarse de estar en \hotel-saas-2\frontend y ejecutar
+```
 npm install
+```
+Para arrancar el servidor ejecutar
+```
 npm run dev
+```
+
 🔒 Características de Seguridad
 Protección de Datos: No se almacenan contraseñas en texto plano; se utiliza un sistema de Hash y Salt único por usuario.
 
