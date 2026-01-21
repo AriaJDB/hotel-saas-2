@@ -36,6 +36,7 @@ Crea un archivo `.env` en la raíz de la carpeta `/backend`:
 ```env
 PORT=3000
 KEYS=tu_palabra_secreta
+```
 
 ### 2. Credenciales de Firebase
 Asegúrate de que el archivo keys.json esté ubicado en la raíz principal del proyecto (fuera de las carpetas de frontend y backend).
