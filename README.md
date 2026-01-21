@@ -1,6 +1,6 @@
 # 🏨 Hotel SaaS - Sistema de Gestión de Reservaciones
 
-Este proyecto es un sistema de gestión hotelera bajo el modelo **SaaS (Software as a Service)**, desarrollado para la materia de Desarrollo de Software del 8vo semestre. El sistema permite la administración de usuarios, autenticación segura y control de acceso basado en roles.
+Este proyecto es un sistema de gestión hotelera bajo el modelo **SaaS (Software as a Service)**, desarrollado para la materia de Desarrollo Web Profesional del 8vo cuatrimestre. El sistema permite la administración de usuarios, autenticación segura y control de acceso basado en roles.
 
 ## 📂 Estructura del Proyecto
 
