@@ -52,10 +52,12 @@ node index
 ```
 
 # Terminal 2: Frontend
+**NOTA: ES NECESARIA UNA VERSIÓN ACTUALIZADA DE NODE**
 Asegurarse de estar en \hotel-saas-2\frontend y ejecutar
 ```
 npm install
 ```
+
 Para arrancar el servidor ejecutar
 ```
 npm run dev
