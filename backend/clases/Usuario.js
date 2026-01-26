@@ -29,7 +29,11 @@ class Usuario {
     }
     set hash(hash) { this._hash = hash; }
     set salt(salt) { this._salt = salt; }
-    set tipo(tipo) { this._tipo = tipo; }
+
+    set tipo(tipo) {
+        const tiposValidos = ["usuario", "admin", "empleado"];
+        if (tiposValidos.includes(tipo)) this._tipo = tipo;
+    }
 
     get id() { return this._id; }
     get nombre() { return this._nombre; }
@@ -43,7 +47,6 @@ class Usuario {
             salt: this._salt,
             tipo: this._tipo
         };
-        // Eliminamos el ID si es undefined para que Firestore no proteste
         return (this._id !== undefined) ? { id: this._id, ...datosCifrados } : datosCifrados;
     }
 }
