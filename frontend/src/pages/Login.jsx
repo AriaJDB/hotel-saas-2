@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { loginUsuario } from '../api/servicios';
 import { Link } from 'react-router-dom';
+import "../styles/Login.css";
 
 const Login = () => {
     const [credenciales, setCredenciales] = useState({ correo: '', password: '' });
