@@ -9,11 +9,20 @@ function validarDatos(usuario) {
 }
 
 async function nuevoUsuario(datos) {
-    const { salt, hash } = encriptarPassword(datos.password);
+    // Aceptar tanto 'password' como 'contrasena'
+    const passwordPlano = datos.password || datos.contrasena;
+
+    if (!passwordPlano) {
+        console.error("Error: No se recibió contraseña");
+        return false;
+    }
+
+    const { salt, hash } = encriptarPassword(passwordPlano);
 
     datos.hash = hash;
     datos.salt = salt;
     datos.password = undefined;
+    datos.contrasena = undefined;
     datos.tipo = datos.tipo || "usuario";
 
     const instanciaUsuario = new Usuario(datos);
@@ -55,4 +64,20 @@ async function login(req, correo, passwordPlano) {
     return respuesta;
 }
 
-module.exports = { nuevoUsuario, login };
+async function mostrarUsuarios() {
+    const usuarios = await usuariosBD.get();
+    const usuariosValidos = [];
+
+    usuarios.forEach(doc => {
+        const usuario = new Usuario({ id: doc.id, ...doc.data() });
+        if (validarDatos(usuario.obtenerDatos)) {
+            // No incluir información sensible (hash, salt)
+            const { hash, salt, ...datosPublicos } = usuario.obtenerDatos;
+            usuariosValidos.push({ id: doc.id, ...datosPublicos });
+        }
+    });
+
+    return usuariosValidos;
+}
+
+module.exports = { nuevoUsuario, login, mostrarUsuarios };
