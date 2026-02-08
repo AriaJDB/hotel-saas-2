@@ -17,5 +17,15 @@ const bd = admin.firestore();
 bd.settings({ ignoreUndefinedProperties: true });
 
 const usuariosBD = bd.collection("usuarios");
+const habitacionesBD = bd.collection("habitaciones");
+const reservacionesBD = bd.collection("reservaciones");
+const articulosBD = bd.collection("articulos");
+const pedidosBD = bd.collection("pedidos");
 
-module.exports = { usuariosBD };
+module.exports = {
+    usuariosBD,
+    habitacionesBD,
+    reservacionesBD,
+    articulosBD,
+    pedidosBD
+};
