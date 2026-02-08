@@ -18,7 +18,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('https://elviajerofeliz.com/wp-content/uploads/2021/04/que-tener-en-cuenta-para-escoger-el-mejor-hotel-1.jpg');
+    background-color: #5889aa;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -26,10 +26,6 @@ body::before {
     z-index: -1;
 }
 
-/* Color de fondo detrás de la imagen */
-body {
-    background-color: #000000; /* Color que se verá debajo de la imagen */
-}
 
 form {
     max-width: 100px;

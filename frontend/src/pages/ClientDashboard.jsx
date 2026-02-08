@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './ClientStyles.css';
+import '../styles/ClientStyles.css';
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);

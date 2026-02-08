@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './CleaningStyles.css';
+import '../styles/CleaningStyles.css';
 
 const CleaningDashboard = () => {
     const [usuario, setUsuario] = useState(null);
