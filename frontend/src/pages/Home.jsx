@@ -5,6 +5,32 @@ import '../styles/ClientStyles.css';
 
 const Home = () => {
     const [habitaciones, setHabitaciones] = useState([]);
+    // Estado para controlar la imagen actual de cada habitación
+    const [currentImages, setCurrentImages] = useState({});
+
+    // Imágenes por tipo de habitación
+    const roomImages = {
+        'Individual': [
+            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
+            'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
+            'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
+        ],
+        'Doble': [
+            'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
+            'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
+            'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800'
+        ],
+        'Suite': [
+            'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800',
+            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
+            'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800'
+        ],
+        'Suite Ejecutiva': [
+            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
+            'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800'
+        ]
+    };
 
     useEffect(() => {
         cargarHabitaciones();
@@ -14,9 +40,42 @@ const Home = () => {
         try {
             const response = await axios.get('http://localhost:3000/habitaciones');
             setHabitaciones(response.data);
+            
+            // Inicializar el índice de imagen para cada habitación
+            const initialImages = {};
+            response.data.forEach(hab => {
+                initialImages[hab.id] = 0;
+            });
+            setCurrentImages(initialImages);
         } catch (error) {
             console.error('Error cargando habitaciones:', error);
         }
+    };
+
+    // Función para cambiar a la siguiente imagen
+    const nextImage = (habId, tipo) => {
+        const images = roomImages[tipo] || roomImages['Individual'];
+        setCurrentImages(prev => ({
+            ...prev,
+            [habId]: (prev[habId] + 1) % images.length
+        }));
+    };
+
+    // Función para cambiar a la imagen anterior
+    const prevImage = (habId, tipo) => {
+        const images = roomImages[tipo] || roomImages['Individual'];
+        setCurrentImages(prev => ({
+            ...prev,
+            [habId]: prev[habId] === 0 ? images.length - 1 : prev[habId] - 1
+        }));
+    };
+
+    // Función para ir a una imagen específica
+    const goToImage = (habId, index) => {
+        setCurrentImages(prev => ({
+            ...prev,
+            [habId]: index
+        }));
     };
 
     return (
@@ -150,7 +209,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Rooms Section */}
+            {/* Rooms Section - CON CARRUSEL INLINE */}
             <section id="habitaciones" className="rooms">
                 <div className="container">
                     <div className="section-header">
@@ -159,42 +218,88 @@ const Home = () => {
                     </div>
 
                     <div className="rooms-grid">
-                        {habitaciones.slice(0, 3).map(hab => (
-                            <article key={hab.id} className="room-card">
-                                <div className="room-image">
-                                    <div className="room-badge">{hab.estado}</div>
-                                    <div className="room-price">
-                                        <span className="price-amount">${hab.precio_noche}</span>
-                                        <span className="price-period">/noche</span>
-                                    </div>
-                                </div>
-                                <div className="room-content">
-                                    <h3 className="room-title">{hab.tipo}</h3>
-                                    <p className="room-description">
-                                        Perfecta para viajeros. Incluye escritorio ejecutivo, WiFi de alta velocidad y espacio de trabajo cómodo.
-                                    </p>
-                                    <div className="room-amenities">
-                                        <div className="amenity">
+                        {habitaciones.slice(0, 3).map(hab => {
+                            const images = roomImages[hab.tipo] || roomImages['Individual'];
+                            const currentIndex = currentImages[hab.id] || 0;
+
+                            return (
+                                <article key={hab.id} className="room-card">
+                                    {/* Carrusel de imágenes */}
+                                    <div className="room-carousel">
+                                        <img 
+                                            src={images[currentIndex]} 
+                                            alt={`${hab.tipo} - Imagen ${currentIndex + 1}`}
+                                            className="room-carousel-image"
+                                        />
+                                        
+                                        {/* Botones de navegación */}
+                                        <button 
+                                            className="carousel-btn carousel-btn-prev" 
+                                            onClick={() => prevImage(hab.id, hab.tipo)}
+                                            aria-label="Imagen anterior"
+                                        >
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
+                                                <polyline points="15 18 9 12 15 6"></polyline>
                                             </svg>
-                                            <span>Confortable</span>
-                                        </div>
-                                        <div className="amenity">
+                                        </button>
+                                        <button 
+                                            className="carousel-btn carousel-btn-next" 
+                                            onClick={() => nextImage(hab.id, hab.tipo)}
+                                            aria-label="Siguiente imagen"
+                                        >
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                <path d="M2 4v16"></path>
-                                                <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                                <polyline points="9 18 15 12 9 6"></polyline>
                                             </svg>
-                                            <span>Hab. {hab.num}</span>
+                                        </button>
+
+                                        {/* Indicadores de puntos */}
+                                        <div className="carousel-dots">
+                                            {images.map((_, index) => (
+                                                <button
+                                                    key={index}
+                                                    className={`carousel-dot ${index === currentIndex ? 'active' : ''}`}
+                                                    onClick={() => goToImage(hab.id, index)}
+                                                    aria-label={`Ir a imagen ${index + 1}`}
+                                                />
+                                            ))}
+                                        </div>
+
+                                        {/* Badges */}
+                                        <div className="room-badge">{hab.estado}</div>
+                                        <div className="room-price">
+                                            <span className="price-amount">${hab.precio_noche}</span>
+                                            <span className="price-period">/noche</span>
                                         </div>
                                     </div>
-                                    <Link to="/registro" className="btn-reserve">
-                                        Reservar Ahora
-                                    </Link>
-                                </div>
-                            </article>
-                        ))}
+
+                                    <div className="room-content">
+                                        <h3 className="room-title">{hab.tipo}</h3>
+                                        <p className="room-description">
+                                            Perfecta para viajeros. Incluye escritorio ejecutivo, WiFi de alta velocidad y espacio de trabajo cómodo.
+                                        </p>
+                                        <div className="room-amenities">
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                </svg>
+                                                <span>Confortable</span>
+                                            </div>
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M2 4v16"></path>
+                                                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                                </svg>
+                                                <span>Hab. {hab.num}</span>
+                                            </div>
+                                        </div>
+                                        <Link to="/registro" className="btn-reserve">
+                                            Reservar Ahora
+                                        </Link>
+                                    </div>
+                                </article>
+                            );
+                        })}
                     </div>
                 </div>
             </section>

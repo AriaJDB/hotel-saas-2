@@ -1,0 +1,152 @@
+/* Se agrega al final del ClientStyles.css existente */
+
+/* ===== ROOM CAROUSEL STYLES ===== */
+
+.room-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.room-carousel {
+    position: relative;
+    height: 280px;
+    background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+    overflow: hidden;
+}
+
+.room-carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.room-carousel:hover .room-carousel-image {
+    transform: scale(1.05);
+}
+
+/* Botones de navegación del carrusel */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    opacity: 0;
+}
+
+.room-carousel:hover .carousel-btn {
+    opacity: 1;
+}
+
+.carousel-btn:hover {
+    background: var(--white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn-prev {
+    left: 1rem;
+}
+
+.carousel-btn-next {
+    right: 1rem;
+}
+
+.carousel-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--primary-blue);
+    stroke-width: 2.5;
+}
+
+/* Indicadores de puntos */
+.carousel-dots {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+}
+
+.carousel-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.carousel-dot:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+}
+
+.carousel-dot.active {
+    width: 1.5rem;
+    border-radius: 0.25rem;
+    background: var(--white);
+}
+
+/* Actualización de .room-image para el carrusel */
+.room-image {
+    position: relative;
+    height: 280px;
+    background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive para carrusel */
+@media (max-width: 768px) {
+    .room-carousel {
+        height: 220px;
+    }
+
+    .carousel-btn {
+        width: 2rem;
+        height: 2rem;
+        opacity: 1; /* Siempre visible en móvil */
+    }
+
+    .carousel-btn-prev {
+        left: 0.5rem;
+    }
+
+    .carousel-btn-next {
+        right: 0.5rem;
+    }
+
+    .carousel-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .carousel-dots {
+        bottom: 0.5rem;
+    }
+
+    .carousel-dot {
+        width: 0.4rem;
+        height: 0.4rem;
+    }
+
+    .carousel-dot.active {
+        width: 1.2rem;
+    }
+}

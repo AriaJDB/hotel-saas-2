@@ -132,9 +132,15 @@
 }
 
 /* ===== AUTH SECTION ===== */
+
+/*== COLOR FONDO ==*/
 .auth-section {
     padding: 4rem 0;
-    background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+    background-image: url('https://thumbs.dreamstime.com/b/entrada-de-hotel-lujo-con-una-fuente-kugel-paisaje-en-primer-plano-simetr%C3%ADa-elegante-dise%C3%B1o-iluminaci%C3%B3n-moderna-renderizaci%C3%B3n-397197428.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     min-height: calc(100vh - 200px);
 }
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/ClientStyles.css';
+import '../styles/ClientStyles-carousel-addon.css';
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);

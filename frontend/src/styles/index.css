@@ -6,29 +6,7 @@
 }
 
 /* ===== CSS VARIABLES ===== */
-:root {
-    /* Colores del Sistema HotelFlow */
-    --primary-blue: #1e3a8a;
-    --primary-blue-dark: #1e40af;
-    --secondary-green: #047857;
-    --secondary-green-dark: #065f46;
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --border-color: #e5e7eb;
-    --bg-light: #f9fafb;
-    --white: #ffffff;
-    
-    /* Sombras */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-    
-    /* Tipografía */
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
+
 
 /* ===== BASE STYLES ===== */
 body {
@@ -42,11 +20,6 @@ body {
 }
 
 /* ===== ROOT CONTAINER ===== */
-#root {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
 
 /* ===== LINKS ===== */
 a {

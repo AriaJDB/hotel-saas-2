@@ -6,6 +6,58 @@ const AdminDashboard = () => {
     const [usuario, setUsuario] = useState(null);
     const [habitaciones, setHabitaciones] = useState([]);
     const [reservaciones, setReservaciones] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
+    const [articulos, setArticulos] = useState([]);
+    const [pedidos, setPedidos] = useState([]);
+    
+    // Estados para modales
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [tipoModal, setTipoModal] = useState(''); // 'habitacion', 'reservacion', 'usuario', 'articulo'
+    const [modoModal, setModoModal] = useState('crear'); // 'crear' o 'editar'
+    const [itemSeleccionado, setItemSeleccionado] = useState(null);
+    
+    // Estados para formularios
+    const [formHabitacion, setFormHabitacion] = useState({
+        num_ha: '',
+        piso: '',
+        tipo: 'Individual',
+        precio_noche: '',
+        amenidades: '',
+        estado: 'Disponible',
+        fotos: ''
+    });
+
+    const [formReservacion, setFormReservacion] = useState({
+        id_usuario: '',
+        num_ha: '',
+        fecha_entrada: '',
+        fecha_salida: '',
+        num_huespedes: 1,
+        metodo_pago: 'Tarjeta',
+        estado_reserva: 'Pendiente',
+        pendiente_pago: 0,
+        total: 0,
+        notas: ''
+    });
+
+    const [formUsuario, setFormUsuario] = useState({
+        nombre: '',
+        apellidos: '',
+        correo: '',
+        telefono: '',
+        password: '',
+        tipo: 'usuario'
+    });
+
+    const [formArticulo, setFormArticulo] = useState({
+        nombre: '',
+        descripcion: '',
+        precio: '',
+        categoria: 'Restaurante',
+        disponibilidad: 'Disponible'
+    });
+
+    const [vistaActual, setVistaActual] = useState('dashboard'); // dashboard, habitaciones, reservaciones, usuarios, articulos
 
     useEffect(() => {
         const usuarioData = localStorage.getItem('usuario');
@@ -17,12 +69,18 @@ const AdminDashboard = () => {
 
     const cargarDatos = async () => {
         try {
-            const [habRes, resRes] = await Promise.all([
+            const [habRes, resRes, usuRes, artRes, pedRes] = await Promise.all([
                 axios.get('http://localhost:3000/habitaciones'),
-                axios.get('http://localhost:3000/reservaciones')
+                axios.get('http://localhost:3000/reservaciones'),
+                axios.get('http://localhost:3000/usuarios'),
+                axios.get('http://localhost:3000/articulos'),
+                axios.get('http://localhost:3000/pedidos')
             ]);
             setHabitaciones(habRes.data);
             setReservaciones(resRes.data);
+            setUsuarios(usuRes.data);
+            setArticulos(artRes.data);
+            setPedidos(pedRes.data);
         } catch (error) {
             console.error('Error cargando datos:', error);
         }
@@ -32,6 +90,218 @@ const AdminDashboard = () => {
         localStorage.removeItem('usuario');
         window.location.href = '/login';
     };
+
+    // ========== FUNCIONES CRUD HABITACIONES ==========
+    const abrirModalHabitacion = (modo, habitacion = null) => {
+        setTipoModal('habitacion');
+        setModoModal(modo);
+        if (habitacion) {
+            setFormHabitacion(habitacion);
+            setItemSeleccionado(habitacion);
+        } else {
+            setFormHabitacion({
+                num_ha: '',
+                piso: '',
+                tipo: 'Individual',
+                precio_noche: '',
+                amenidades: '',
+                estado: 'Disponible',
+                fotos: ''
+            });
+        }
+        setModalAbierto(true);
+    };
+
+    const guardarHabitacion = async () => {
+        try {
+            if (modoModal === 'crear') {
+                await axios.post('http://localhost:3000/habitaciones', formHabitacion);
+            } else {
+                await axios.put(`http://localhost:3000/habitaciones/${itemSeleccionado.id}`, formHabitacion);
+            }
+            cargarDatos();
+            cerrarModal();
+            alert('Habitación guardada exitosamente');
+        } catch (error) {
+            console.error('Error guardando habitación:', error);
+            alert('Error al guardar habitación');
+        }
+    };
+
+    const eliminarHabitacion = async (id) => {
+        if (window.confirm('¿Estás seguro de eliminar esta habitación?')) {
+            try {
+                await axios.delete(`http://localhost:3000/habitaciones/${id}`);
+                cargarDatos();
+                alert('Habitación eliminada exitosamente');
+            } catch (error) {
+                console.error('Error eliminando habitación:', error);
+                alert('Error al eliminar habitación');
+            }
+        }
+    };
+
+    // ========== FUNCIONES CRUD RESERVACIONES ==========
+    const abrirModalReservacion = (modo, reservacion = null) => {
+        setTipoModal('reservacion');
+        setModoModal(modo);
+        if (reservacion) {
+            setFormReservacion(reservacion);
+            setItemSeleccionado(reservacion);
+        } else {
+            setFormReservacion({
+                id_usuario: '',
+                num_ha: '',
+                fecha_entrada: '',
+                fecha_salida: '',
+                num_huespedes: 1,
+                metodo_pago: 'Tarjeta',
+                estado_reserva: 'Pendiente',
+                pendiente_pago: 0,
+                total: 0,
+                notas: ''
+            });
+        }
+        setModalAbierto(true);
+    };
+
+    const guardarReservacion = async () => {
+        try {
+            if (modoModal === 'crear') {
+                await axios.post('http://localhost:3000/reservaciones', formReservacion);
+            } else {
+                await axios.put(`http://localhost:3000/reservaciones/${itemSeleccionado.id}`, formReservacion);
+            }
+            cargarDatos();
+            cerrarModal();
+            alert('Reservación guardada exitosamente');
+        } catch (error) {
+            console.error('Error guardando reservación:', error);
+            alert('Error al guardar reservación');
+        }
+    };
+
+    const eliminarReservacion = async (id) => {
+        if (window.confirm('¿Estás seguro de eliminar esta reservación?')) {
+            try {
+                await axios.delete(`http://localhost:3000/reservaciones/${id}`);
+                cargarDatos();
+                alert('Reservación eliminada exitosamente');
+            } catch (error) {
+                console.error('Error eliminando reservación:', error);
+                alert('Error al eliminar reservación');
+            }
+        }
+    };
+
+    // ========== FUNCIONES CRUD USUARIOS ==========
+    const abrirModalUsuario = (modo, usuario = null) => {
+        setTipoModal('usuario');
+        setModoModal(modo);
+        if (usuario) {
+            setFormUsuario(usuario);
+            setItemSeleccionado(usuario);
+        } else {
+            setFormUsuario({
+                nombre: '',
+                apellidos: '',
+                correo: '',
+                telefono: '',
+                password: '',
+                tipo: 'usuario'
+            });
+        }
+        setModalAbierto(true);
+    };
+
+    const guardarUsuario = async () => {
+        try {
+            if (modoModal === 'crear') {
+                await axios.post('http://localhost:3000/usuarios', formUsuario);
+            } else {
+                await axios.put(`http://localhost:3000/usuarios/${itemSeleccionado.id}`, formUsuario);
+            }
+            cargarDatos();
+            cerrarModal();
+            alert('Usuario guardado exitosamente');
+        } catch (error) {
+            console.error('Error guardando usuario:', error);
+            alert('Error al guardar usuario');
+        }
+    };
+
+    const eliminarUsuario = async (id) => {
+        if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
+            try {
+                await axios.delete(`http://localhost:3000/usuarios/${id}`);
+                cargarDatos();
+                alert('Usuario eliminado exitosamente');
+            } catch (error) {
+                console.error('Error eliminando usuario:', error);
+                alert('Error al eliminar usuario');
+            }
+        }
+    };
+
+    // ========== FUNCIONES CRUD ARTÍCULOS ==========
+    const abrirModalArticulo = (modo, articulo = null) => {
+        setTipoModal('articulo');
+        setModoModal(modo);
+        if (articulo) {
+            setFormArticulo(articulo);
+            setItemSeleccionado(articulo);
+        } else {
+            setFormArticulo({
+                nombre: '',
+                descripcion: '',
+                precio: '',
+                categoria: 'Restaurante',
+                disponibilidad: 'Disponible'
+            });
+        }
+        setModalAbierto(true);
+    };
+
+    const guardarArticulo = async () => {
+        try {
+            if (modoModal === 'crear') {
+                await axios.post('http://localhost:3000/articulos', formArticulo);
+            } else {
+                await axios.put(`http://localhost:3000/articulos/${itemSeleccionado.id}`, formArticulo);
+            }
+            cargarDatos();
+            cerrarModal();
+            alert('Artículo guardado exitosamente');
+        } catch (error) {
+            console.error('Error guardando artículo:', error);
+            alert('Error al guardar artículo');
+        }
+    };
+
+    const eliminarArticulo = async (id) => {
+        if (window.confirm('¿Estás seguro de eliminar este artículo?')) {
+            try {
+                await axios.delete(`http://localhost:3000/articulos/${id}`);
+                cargarDatos();
+                alert('Artículo eliminado exitosamente');
+            } catch (error) {
+                console.error('Error eliminando artículo:', error);
+                alert('Error al eliminar artículo');
+            }
+        }
+    };
+
+    const cerrarModal = () => {
+        setModalAbierto(false);
+        setTipoModal('');
+        setModoModal('crear');
+        setItemSeleccionado(null);
+    };
+
+    // ========== CALCULOS ESTADISTICAS ==========
+    const habitacionesDisponibles = habitaciones.filter(h => h.estado === 'Disponible').length;
+    const reservacionesActivas = reservaciones.filter(r => r.estado_reserva === 'Confirmada').length;
+    const ingresosTotales = reservaciones.reduce((sum, r) => sum + (r.total || 0), 0);
 
     return (
         <div>
@@ -50,9 +320,11 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                         <nav className="main-nav">
-                            <a href="#dashboard" className="nav-link active">Dashboard</a>
-                            <a href="#reservaciones" className="nav-link">Reservaciones</a>
-                            <a href="#habitaciones" className="nav-link">Habitaciones</a>
+                            <a href="#" className={vistaActual === 'dashboard' ? 'nav-link active' : 'nav-link'} onClick={() => setVistaActual('dashboard')}>Dashboard</a>
+                            <a href="#" className={vistaActual === 'habitaciones' ? 'nav-link active' : 'nav-link'} onClick={() => setVistaActual('habitaciones')}>Habitaciones</a>
+                            <a href="#" className={vistaActual === 'reservaciones' ? 'nav-link active' : 'nav-link'} onClick={() => setVistaActual('reservaciones')}>Reservaciones</a>
+                            <a href="#" className={vistaActual === 'usuarios' ? 'nav-link active' : 'nav-link'} onClick={() => setVistaActual('usuarios')}>Usuarios</a>
+                            <a href="#" className={vistaActual === 'articulos' ? 'nav-link active' : 'nav-link'} onClick={() => setVistaActual('articulos')}>Artículos</a>
                         </nav>
                         <div className="header-actions">
                             <div className="admin-profile">
@@ -68,50 +340,189 @@ const AdminDashboard = () => {
                 </div>
             </header>
 
-            {/* Dashboard Section */}
-            <section id="dashboard" className="dashboard-section">
-                <div className="container">
-                    <div className="section-header">
-                        <h2 className="section-title">Panel de Control</h2>
-                        <p className="section-subtitle">Resumen general del sistema de reservaciones</p>
-                    </div>
+            {/* VISTA DASHBOARD */}
+            {vistaActual === 'dashboard' && (
+                <section id="dashboard" className="dashboard-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 className="section-title">Panel de Control</h2>
+                            <p className="section-subtitle">Resumen general del sistema de reservaciones</p>
+                        </div>
 
-                    {/* Stats Cards */}
-                    <div className="stats-grid">
-                        <div className="stat-card stat-card-blue">
-                            <div className="stat-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="8.5" cy="7" r="4"></circle>
-                                    <polyline points="17 11 19 13 23 9"></polyline>
-                                </svg>
+                        {/* Stats Cards */}
+                        <div className="stats-grid">
+                            <div className="stat-card stat-card-blue">
+                                <div className="stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="8.5" cy="7" r="4"></circle>
+                                        <polyline points="17 11 19 13 23 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div className="stat-content">
+                                    <h3>Reservaciones Activas</h3>
+                                    <p className="stat-number">{reservacionesActivas}</p>
+                                    <span className="stat-change stat-positive">Confirmadas</span>
+                                </div>
                             </div>
-                            <div className="stat-content">
-                                <h3>Reservaciones Activas</h3>
-                                <p className="stat-number">{reservaciones.length}</p>
-                                <span className="stat-change stat-positive">Sistema activo</span>
+
+                            <div className="stat-card stat-card-green">
+                                <div className="stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M2 4v16"></path>
+                                        <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                    </svg>
+                                </div>
+                                <div className="stat-content">
+                                    <h3>Habitaciones Disponibles</h3>
+                                    <p className="stat-number">{habitacionesDisponibles} / {habitaciones.length}</p>
+                                    <span className="stat-change stat-neutral">Activas</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="stat-card stat-card-green">
-                            <div className="stat-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M2 4v16"></path>
-                                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
-                                </svg>
+                        {/* Recent Reservations */}
+                        <div className="dashboard-section-content">
+                            <div className="content-header">
+                                <h3>Reservaciones Recientes</h3>
+                                <button className="btn-primary" onClick={() => abrirModalReservacion('crear')}>
+                                    + Nueva Reservación
+                                </button>
                             </div>
-                            <div className="stat-content">
-                                <h3>Habitaciones Totales</h3>
-                                <p className="stat-number">{habitaciones.length}</p>
-                                <span className="stat-change stat-neutral">Disponibles</span>
+
+                            <div className="table-container">
+                                <table className="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Habitación</th>
+                                            <th>Entrada</th>
+                                            <th>Salida</th>
+                                            <th>Huéspedes</th>
+                                            <th>Total</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {reservaciones.slice(0, 5).map(res => (
+                                            <tr key={res.id}>
+                                                <td>#{res.id}</td>
+                                                <td>Hab. {res.num_ha}</td>
+                                                <td>{res.fecha_entrada}</td>
+                                                <td>{res.fecha_salida}</td>
+                                                <td>{res.num_huespedes}</td>
+                                                <td>${res.total}</td>
+                                                <td><span className="badge badge-confirmed">{res.estado_reserva}</span></td>
+                                                <td>
+                                                    <button className="btn-icon" onClick={() => abrirModalReservacion('editar', res)}>✏️</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Rooms Management */}
+                        <div className="dashboard-section-content">
+                            <div className="content-header">
+                                <h3>Gestión de Habitaciones</h3>
+                                <button className="btn-primary" onClick={() => abrirModalHabitacion('crear')}>
+                                    + Nueva Habitación
+                                </button>
+                            </div>
+
+                            <div className="rooms-admin-grid">
+                                {habitaciones.slice(0, 6).map(hab => (
+                                    <div key={hab.id} className="room-admin-card">
+                                        <div className="room-admin-header">
+                                            <h4>{hab.tipo}</h4>
+                                            <span className={`room-status ${hab.estado === 'Disponible' ? 'room-available' : 'room-occupied'}`}>
+                                                {hab.estado}
+                                            </span>
+                                        </div>
+                                        <div className="room-admin-details">
+                                            <div className="detail-item">
+                                                <span className="detail-label">Precio:</span>
+                                                <span className="detail-value">${hab.precio_noche}/noche</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <span className="detail-label">Número:</span>
+                                                <span className="detail-value">Hab. {hab.num_ha}</span>
+                                            </div>
+                                            <div className="detail-item">
+                                                <span className="detail-label">Piso:</span>
+                                                <span className="detail-value">Piso {hab.piso}</span>
+                                            </div>
+                                        </div>
+                                        <div className="room-admin-actions">
+                                            <button className="btn-edit" onClick={() => abrirModalHabitacion('editar', hab)}>Editar</button>
+                                            <button className="btn-delete" onClick={() => eliminarHabitacion(hab.id)}>Eliminar</button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
+                </section>
+            )}
 
-                    {/* Recent Reservations */}
-                    <div className="dashboard-section-content">
-                        <div className="content-header">
-                            <h3>Reservaciones Recientes</h3>
+            {/* VISTA HABITACIONES */}
+            {vistaActual === 'habitaciones' && (
+                <section className="dashboard-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 className="section-title">Gestión de Habitaciones</h2>
+                            <button className="btn-primary" onClick={() => abrirModalHabitacion('crear')}>
+                                + Nueva Habitación
+                            </button>
+                        </div>
+
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Piso</th>
+                                        <th>Tipo</th>
+                                        <th>Precio/Noche</th>
+                                        <th>Amenidades</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {habitaciones.map(hab => (
+                                        <tr key={hab.id}>
+                                            <td>Hab. {hab.num_ha}</td>
+                                            <td>Piso {hab.piso}</td>
+                                            <td>{hab.tipo}</td>
+                                            <td>${hab.precio_noche}</td>
+                                            <td>{hab.amenidades}</td>
+                                            <td><span className={`badge ${hab.estado === 'Disponible' ? 'badge-success' : 'badge-warning'}`}>{hab.estado}</span></td>
+                                            <td>
+                                                <button className="btn-icon" onClick={() => abrirModalHabitacion('editar', hab)}>✏️</button>
+                                                <button className="btn-icon btn-danger" onClick={() => eliminarHabitacion(hab.id)}>🗑️</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* VISTA RESERVACIONES */}
+            {vistaActual === 'reservaciones' && (
+                <section className="dashboard-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 className="section-title">Gestión de Reservaciones</h2>
+                            <button className="btn-primary" onClick={() => abrirModalReservacion('crear')}>
+                                + Nueva Reservación
+                            </button>
                         </div>
 
                         <div className="table-container">
@@ -119,58 +530,461 @@ const AdminDashboard = () => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Usuario</th>
                                         <th>Habitación</th>
-                                        <th>Fecha Entrada</th>
-                                        <th>Fecha Salida</th>
+                                        <th>Entrada</th>
+                                        <th>Salida</th>
+                                        <th>Huéspedes</th>
+                                        <th>Total</th>
+                                        <th>Pendiente</th>
                                         <th>Estado</th>
+                                        <th>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {reservaciones.slice(0, 5).map(res => (
+                                    {reservaciones.map(res => (
                                         <tr key={res.id}>
                                             <td>#{res.id}</td>
-                                            <td>{res.num_hab}</td>
+                                            <td>{res.id_usuario}</td>
+                                            <td>Hab. {res.num_ha}</td>
                                             <td>{res.fecha_entrada}</td>
                                             <td>{res.fecha_salida}</td>
-                                            <td><span className="badge badge-confirmed">{res.estado_reserva}</span></td>
+                                            <td>{res.num_huespedes}</td>
+                                            <td>${res.total}</td>
+                                            <td>${res.pendiente_pago}</td>
+                                            <td><span className="badge badge-info">{res.estado_reserva}</span></td>
+                                            <td>
+                                                <button className="btn-icon" onClick={() => abrirModalReservacion('editar', res)}>✏️</button>
+                                                <button className="btn-icon btn-danger" onClick={() => eliminarReservacion(res.id)}>🗑️</button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                </section>
+            )}
 
-                    {/* Rooms Management */}
-                    <div className="dashboard-section-content">
-                        <div className="content-header">
-                            <h3>Gestión de Habitaciones</h3>
+            {/* VISTA USUARIOS */}
+            {vistaActual === 'usuarios' && (
+                <section className="dashboard-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 className="section-title">Gestión de Usuarios</h2>
+                            <button className="btn-primary" onClick={() => abrirModalUsuario('crear')}>
+                                + Nuevo Usuario
+                            </button>
                         </div>
 
-                        <div className="rooms-admin-grid">
-                            {habitaciones.slice(0, 6).map(hab => (
-                                <div key={hab.id} className="room-admin-card">
-                                    <div className="room-admin-header">
-                                        <h4>{hab.tipo}</h4>
-                                        <span className={`room-status ${hab.estado === 'Disponible' ? 'room-available' : 'room-occupied'}`}>
-                                            {hab.estado}
-                                        </span>
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Correo</th>
+                                        <th>Teléfono</th>
+                                        <th>Tipo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usuarios.map(user => (
+                                        <tr key={user.id}>
+                                            <td>#{user.id}</td>
+                                            <td>{user.nombre} {user.apellidos}</td>
+                                            <td>{user.correo}</td>
+                                            <td>{user.telefono}</td>
+                                            <td><span className="badge badge-primary">{user.tipo}</span></td>
+                                            <td>
+                                                <button className="btn-icon" onClick={() => abrirModalUsuario('editar', user)}>✏️</button>
+                                                <button className="btn-icon btn-danger" onClick={() => eliminarUsuario(user.id)}>🗑️</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* VISTA ARTÍCULOS */}
+            {vistaActual === 'articulos' && (
+                <section className="dashboard-section">
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 className="section-title">Gestión de Artículos</h2>
+                            <button className="btn-primary" onClick={() => abrirModalArticulo('crear')}>
+                                + Nuevo Artículo
+                            </button>
+                        </div>
+
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Precio</th>
+                                        <th>Categoría</th>
+                                        <th>Disponibilidad</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {articulos.map(art => (
+                                        <tr key={art.id}>
+                                            <td>#{art.id}</td>
+                                            <td>{art.nombre}</td>
+                                            <td>{art.descripcion}</td>
+                                            <td>${art.precio}</td>
+                                            <td>{art.categoria}</td>
+                                            <td><span className={`badge ${art.disponibilidad === 'Disponible' ? 'badge-success' : 'badge-danger'}`}>{art.disponibilidad}</span></td>
+                                            <td>
+                                                <button className="btn-icon" onClick={() => abrirModalArticulo('editar', art)}>✏️</button>
+                                                <button className="btn-icon btn-danger" onClick={() => eliminarArticulo(art.id)}>🗑️</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* MODAL UNIVERSAL */}
+            {modalAbierto && (
+                <div className="modal-overlay" onClick={cerrarModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>
+                                {modoModal === 'crear' ? 'Crear' : 'Editar'} {' '}
+                                {tipoModal === 'habitacion' && 'Habitación'}
+                                {tipoModal === 'reservacion' && 'Reservación'}
+                                {tipoModal === 'usuario' && 'Usuario'}
+                                {tipoModal === 'articulo' && 'Artículo'}
+                            </h2>
+                            <button className="modal-close" onClick={cerrarModal}>×</button>
+                        </div>
+
+                        <div className="modal-body">
+                            {/* FORMULARIO HABITACIÓN */}
+                            {tipoModal === 'habitacion' && (
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>Número de Habitación</label>
+                                        <input
+                                            type="number"
+                                            value={formHabitacion.num_ha}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, num_ha: e.target.value})}
+                                            className="form-input"
+                                        />
                                     </div>
-                                    <div className="room-admin-details">
-                                        <div className="detail-item">
-                                            <span className="detail-label">Precio:</span>
-                                            <span className="detail-value">${hab.precio_noche}/noche</span>
-                                        </div>
-                                        <div className="detail-item">
-                                            <span className="detail-label">Número:</span>
-                                            <span className="detail-value">Hab. {hab.num}</span>
-                                        </div>
+                                    <div className="form-group">
+                                        <label>Piso</label>
+                                        <input
+                                            type="number"
+                                            value={formHabitacion.piso}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, piso: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Tipo</label>
+                                        <select
+                                            value={formHabitacion.tipo}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, tipo: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Individual">Individual</option>
+                                            <option value="Doble">Doble</option>
+                                            <option value="Suite">Suite</option>
+                                            <option value="Suite Ejecutiva">Suite Ejecutiva</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Precio por Noche</label>
+                                        <input
+                                            type="number"
+                                            value={formHabitacion.precio_noche}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, precio_noche: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Amenidades</label>
+                                        <input
+                                            type="text"
+                                            value={formHabitacion.amenidades}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, amenidades: e.target.value})}
+                                            className="form-input"
+                                            placeholder="WiFi, TV, Aire acondicionado"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Estado</label>
+                                        <select
+                                            value={formHabitacion.estado}
+                                            onChange={(e) => setFormHabitacion({...formHabitacion, estado: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Disponible">Disponible</option>
+                                            <option value="Ocupada">Ocupada</option>
+                                            <option value="Limpieza">Limpieza</option>
+                                            <option value="Mantenimiento">Mantenimiento</option>
+                                        </select>
                                     </div>
                                 </div>
-                            ))}
+                            )}
+
+                            {/* FORMULARIO RESERVACIÓN */}
+                            {tipoModal === 'reservacion' && (
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>ID Usuario</label>
+                                        <input
+                                            type="text"
+                                            value={formReservacion.id_usuario}
+                                            onChange={(e) => setFormReservacion({...formReservacion, id_usuario: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Número de Habitación</label>
+                                        <select
+                                            value={formReservacion.num_ha}
+                                            onChange={(e) => setFormReservacion({...formReservacion, num_ha: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="">Seleccione habitación</option>
+                                            {habitaciones.filter(h => h.estado === 'Disponible').map(hab => (
+                                                <option key={hab.id} value={hab.num_ha}>Hab. {hab.num_ha} - {hab.tipo}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Fecha de Entrada</label>
+                                        <input
+                                            type="date"
+                                            value={formReservacion.fecha_entrada}
+                                            onChange={(e) => setFormReservacion({...formReservacion, fecha_entrada: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Fecha de Salida</label>
+                                        <input
+                                            type="date"
+                                            value={formReservacion.fecha_salida}
+                                            onChange={(e) => setFormReservacion({...formReservacion, fecha_salida: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Número de Huéspedes</label>
+                                        <input
+                                            type="number"
+                                            value={formReservacion.num_huespedes}
+                                            onChange={(e) => setFormReservacion({...formReservacion, num_huespedes: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Método de Pago</label>
+                                        <select
+                                            value={formReservacion.metodo_pago}
+                                            onChange={(e) => setFormReservacion({...formReservacion, metodo_pago: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Tarjeta">Tarjeta</option>
+                                            <option value="Efectivo">Efectivo</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Total</label>
+                                        <input
+                                            type="number"
+                                            value={formReservacion.total}
+                                            onChange={(e) => setFormReservacion({...formReservacion, total: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Pendiente de Pago</label>
+                                        <input
+                                            type="number"
+                                            value={formReservacion.pendiente_pago}
+                                            onChange={(e) => setFormReservacion({...formReservacion, pendiente_pago: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Estado</label>
+                                        <select
+                                            value={formReservacion.estado_reserva}
+                                            onChange={(e) => setFormReservacion({...formReservacion, estado_reserva: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Pendiente">Pendiente</option>
+                                            <option value="Confirmada">Confirmada</option>
+                                            <option value="Check-in">Check-in</option>
+                                            <option value="Completada">Completada</option>
+                                            <option value="Cancelada">Cancelada</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group form-group-full">
+                                        <label>Notas</label>
+                                        <textarea
+                                            value={formReservacion.notas}
+                                            onChange={(e) => setFormReservacion({...formReservacion, notas: e.target.value})}
+                                            className="form-input"
+                                            rows="3"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FORMULARIO USUARIO */}
+                            {tipoModal === 'usuario' && (
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={formUsuario.nombre}
+                                            onChange={(e) => setFormUsuario({...formUsuario, nombre: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Apellidos</label>
+                                        <input
+                                            type="text"
+                                            value={formUsuario.apellidos}
+                                            onChange={(e) => setFormUsuario({...formUsuario, apellidos: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Correo</label>
+                                        <input
+                                            type="email"
+                                            value={formUsuario.correo}
+                                            onChange={(e) => setFormUsuario({...formUsuario, correo: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Teléfono</label>
+                                        <input
+                                            type="tel"
+                                            value={formUsuario.telefono}
+                                            onChange={(e) => setFormUsuario({...formUsuario, telefono: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Contraseña</label>
+                                        <input
+                                            type="password"
+                                            value={formUsuario.password}
+                                            onChange={(e) => setFormUsuario({...formUsuario, password: e.target.value})}
+                                            className="form-input"
+                                            placeholder={modoModal === 'editar' ? 'Dejar en blanco para no cambiar' : ''}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Tipo de Usuario</label>
+                                        <select
+                                            value={formUsuario.tipo}
+                                            onChange={(e) => setFormUsuario({...formUsuario, tipo: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="usuario">Usuario</option>
+                                            <option value="admin">Administrador</option>
+                                            <option value="empleado">Empleado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FORMULARIO ARTÍCULO */}
+                            {tipoModal === 'articulo' && (
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label>Nombre</label>
+                                        <input
+                                            type="text"
+                                            value={formArticulo.nombre}
+                                            onChange={(e) => setFormArticulo({...formArticulo, nombre: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Precio</label>
+                                        <input
+                                            type="number"
+                                            value={formArticulo.precio}
+                                            onChange={(e) => setFormArticulo({...formArticulo, precio: e.target.value})}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Categoría</label>
+                                        <select
+                                            value={formArticulo.categoria}
+                                            onChange={(e) => setFormArticulo({...formArticulo, categoria: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Restaurante">Restaurante</option>
+                                            <option value="Blancos">Blancos</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Disponibilidad</label>
+                                        <select
+                                            value={formArticulo.disponibilidad}
+                                            onChange={(e) => setFormArticulo({...formArticulo, disponibilidad: e.target.value})}
+                                            className="form-input"
+                                        >
+                                            <option value="Disponible">Disponible</option>
+                                            <option value="Agotado">Agotado</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group form-group-full">
+                                        <label>Descripción</label>
+                                        <textarea
+                                            value={formArticulo.descripcion}
+                                            onChange={(e) => setFormArticulo({...formArticulo, descripcion: e.target.value})}
+                                            className="form-input"
+                                            rows="3"
+                                        ></textarea>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="modal-footer">
+                            <button className="btn-secondary" onClick={cerrarModal}>Cancelar</button>
+                            <button 
+                                className="btn-primary" 
+                                onClick={() => {
+                                    if (tipoModal === 'habitacion') guardarHabitacion();
+                                    else if (tipoModal === 'reservacion') guardarReservacion();
+                                    else if (tipoModal === 'usuario') guardarUsuario();
+                                    else if (tipoModal === 'articulo') guardarArticulo();
+                                }}
+                            >
+                                {modoModal === 'crear' ? 'Crear' : 'Guardar'}
+                            </button>
                         </div>
                     </div>
                 </div>
-            </section>
+            )}
 
             {/* Footer */}
             <footer className="footer">
