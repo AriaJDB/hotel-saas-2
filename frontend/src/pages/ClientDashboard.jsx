@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/ClientStyles.css';
-import '../styles/ClientStyles-carousel-addon.css';
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);
     const [habitaciones, setHabitaciones] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const usuarioData = localStorage.getItem('usuario');
-        if (usuarioData) {
-            setUsuario(JSON.parse(usuarioData));
-        }
+        if (usuarioData) setUsuario(JSON.parse(usuarioData));
         cargarHabitaciones();
     }, []);
 
     const cargarHabitaciones = async () => {
         try {
+            setLoading(true);
             const response = await axios.get('http://localhost:3000/habitaciones');
             setHabitaciones(response.data);
+            setError(null);
         } catch (error) {
             console.error('Error cargando habitaciones:', error);
+            setError('No se pudieron cargar las habitaciones');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -28,6 +32,8 @@ const ClientDashboard = () => {
         localStorage.removeItem('usuario');
         window.location.href = '/login';
     };
+
+    const habitacionesDisponibles = habitaciones.filter(h => h.estado === 'Disponible');
 
     return (
         <div>
@@ -123,51 +129,72 @@ const ClientDashboard = () => {
             </section>
 
             {/* Rooms Section */}
-            <section className="rooms">
+            <section id="habitaciones" className="rooms">
                 <div className="container">
                     <div className="section-header">
                         <h2 className="section-title">Nuestras Habitaciones</h2>
                         <p className="section-subtitle">Espacios diseñados para su comodidad y productividad</p>
                     </div>
 
-                    <div className="rooms-grid">
-                        {habitaciones.filter(h => h.estado === 'Disponible').map(hab => (
-                            <article key={hab.id} className="room-card">
-                                <div className="room-image">
-                                    <div className="room-badge">Disponible</div>
-                                    <div className="room-price">
-                                        <span className="price-amount">${hab.precio_noche}</span>
-                                        <span className="price-period">/noche</span>
-                                    </div>
-                                </div>
-                                <div className="room-content">
-                                    <h3 className="room-title">{hab.tipo}</h3>
-                                    <p className="room-description">
-                                        Perfecta para su estadía. Incluye todas las comodidades necesarias para una experiencia inolvidable.
-                                    </p>
-                                    <div className="room-amenities">
-                                        <div className="amenity">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                <circle cx="9" cy="7" r="4"></circle>
-                                            </svg>
-                                            <span>Confortable</span>
+                    {loading && (
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                            <p>Cargando habitaciones...</p>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="error-message">
+                            <p>{error}</p>
+                            <button className="btn-primary" onClick={cargarHabitaciones}>Reintentar</button>
+                        </div>
+                    )}
+
+                    {!loading && !error && habitacionesDisponibles.length === 0 && (
+                        <div className="empty-state">
+                            <h3>No hay habitaciones disponibles</h3>
+                            <p>Por favor, intenta más tarde</p>
+                        </div>
+                    )}
+
+                    {!loading && !error && habitacionesDisponibles.length > 0 && (
+                        <div className="rooms-grid">
+                            {habitacionesDisponibles.map(hab => (
+                                <article key={hab.id} className="room-card">
+                                    <div className="room-image">
+                                        <div className="room-badge">Disponible</div>
+                                        <div className="room-price">
+                                            <span className="price-amount">${hab.precio_noche}</span>
+                                            <span className="price-period">/noche</span>
                                         </div>
-                                        <div className="amenity">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                <path d="M2 4v16"></path>
-                                                <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
-                                            </svg>
-                                            <span>Hab. {hab.num}</span>
-                                        </div>
                                     </div>
-                                    <button className="btn-reserve">
-                                        Reservar Ahora
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                                    <div className="room-content">
+                                        <h3 className="room-title">{hab.tipo}</h3>
+                                        <p className="room-description">
+                                            Habitación {hab.num_ha} en el piso {hab.piso}. {hab.amenidades || 'Todas las comodidades para su estadía.'}
+                                        </p>
+                                        <div className="room-amenities">
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                </svg>
+                                                <span>Confortable</span>
+                                            </div>
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M2 4v16"></path>
+                                                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                                </svg>
+                                                <span>Hab. {hab.num_ha}</span>
+                                            </div>
+                                        </div>
+                                        <button className="btn-reserve">Reservar Ahora</button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -197,6 +224,54 @@ const ClientDashboard = () => {
                     </div>
                 </div>
             </footer>
+
+            <style>{`
+                .loading-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 4rem 2rem;
+                    color: var(--text-secondary);
+                }
+
+                .loading-spinner {
+                    width: 3rem;
+                    height: 3rem;
+                    border: 3px solid var(--border-color);
+                    border-top-color: var(--primary-blue);
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin-bottom: 1rem;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+
+                .error-message {
+                    text-align: center;
+                    padding: 3rem 2rem;
+                    background: #fee2e2;
+                    border-radius: 0.75rem;
+                    color: #991b1b;
+                }
+
+                .error-message p {
+                    margin-bottom: 1rem;
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 4rem 2rem;
+                    color: var(--text-secondary);
+                }
+
+                .empty-state h3 {
+                    font-size: 1.5rem;
+                    color: var(--text-primary);
+                    margin-bottom: 0.5rem;
+                }
+            `}</style>
         </div>
     );
 };
