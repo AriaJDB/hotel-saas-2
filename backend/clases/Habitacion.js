@@ -1,32 +1,48 @@
 class Habitacion {
     constructor(datos) {
-        this.num = datos.num;
+        // Mapeamos num_ha que viene del front a num del modelo
+        this.num = datos.num_ha || datos.num; 
         this.piso = datos.piso;
         this.tipo = datos.tipo;
         this.precio_noche = datos.precio_noche;
         this.amenidades = datos.amenidades;
         this.estado = datos.estado;
+        this.ultima_lim = datos.ultima_lim || null; // Campo de la imagen
+        this.id_em = datos.id_em || null;           // Campo de la imagen
     }
 
-    set num(num) {
-        const regex = /^[A-Z0-9]{1,5}$/;
-        if (regex.test(num)) this._num = num;
+    set num(val) {
+        const valorNumerico = parseInt(val);
+        if (!isNaN(valorNumerico)) {
+            this._num = valorNumerico;
+        }
     }
+
     set piso(piso) {
-        if (!isNaN(piso) && piso >= 0) this._piso = piso;
+        if (!isNaN(piso) && piso >= 0) this._piso = parseInt(piso);
     }
+
     set tipo(tipo) {
-        const tiposValidos = ["Sencilla", "Doble", "Suite", "Deluxe"];
+        // Sincronizado con tu imagen: individual, doble, triple
+        const tiposValidos = ["Individual", "Doble", "Triple", "Suite", "Deluxe"];
         if (tiposValidos.includes(tipo)) this._tipo = tipo;
     }
-    set precio_noche(precio) {
-        if (!isNaN(precio) && precio > 0) this._precio_noche = precio;
-    }
-    set amenidades(amenidades) { this._amenidades = amenidades; }
+
     set estado(estado) {
-        const estadosValidos = ["Disponible", "Ocupada", "Limpiando", "Mantenimiento"];
+        // Sincronizado con tu imagen: ocupada, libre, limpieza, mantenimiento
+        const estadosValidos = ["Ocupada", "Disponible", "Limpieza", "Mantenimiento"];
         if (estadosValidos.includes(estado)) this._estado = estado;
     }
+
+    set precio_noche(precio) {
+        if (!isNaN(precio) && precio > 0) this._precio_noche = parseFloat(precio);
+    }
+
+    set amenidades(amenidades) { this._amenidades = amenidades; }
+
+
+    set ultima_lim(fecha) { this._ultima_lim = fecha; }
+    set id_em(id) { this._id_em = id; }
 
     get obtenerDatos() {
         return {
@@ -35,8 +51,11 @@ class Habitacion {
             tipo: this._tipo,
             precio_noche: this._precio_noche,
             amenidades: this._amenidades,
-            estado: this._estado
+            estado: this._estado,
+            ultima_lim: this.ultima_lim,
+            id_em: this.id_em
         };
     }
 }
+
 module.exports = Habitacion;

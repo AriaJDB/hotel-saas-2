@@ -1,11 +1,46 @@
 const Habitacion = require("../clases/Habitacion");
 const { habitacionesBD } = require("./conexion");
 
+// habitacionesBD.js
+
 function validarDatos(habitacion) {
+    // Verificamos que los campos obligatorios existan en el objeto procesado por la clase
     return habitacion.num !== undefined &&
-        habitacion.tipo !== undefined &&
-        habitacion.precio_noche !== undefined &&
-        habitacion.estado !== undefined;
+           habitacion.tipo !== undefined &&
+           habitacion.precio_noche !== undefined &&
+           habitacion.estado !== undefined;
+}
+
+async function nuevaHabitacion(datos) {
+    try {
+        // Unificamos los nombres: el frontend envía 'num_ha' pero el modelo usa 'num'
+        const datosParaModelo = {
+            ...datos,
+            num: datos.num_ha, // Mapeo crítico
+            estado: datos.estado || "Libre" 
+        };
+
+        const instanciaHabitacion = new Habitacion(datosParaModelo);
+        const datosValidados = instanciaHabitacion.obtenerDatos;
+
+        // Verificamos qué se está intentando guardar
+        if (!validarDatos(datosValidados)) {
+            console.error("Fallo de validación en:", datosValidados);
+            return { exito: false, mensaje: "Datos inválidos: revisa que el número y tipo sean correctos" };
+        }
+
+        const existente = await obtenerHabitacionPorNum(datosValidados.num);
+        if (existente) {
+            return { exito: false, mensaje: "Ya existe una habitación con ese número" };
+        }
+
+        // Se guarda en la colección 'habitaciones' definida en conexion.js [cite: 17]
+        await habitacionesBD.doc().set(datosValidados);
+        return { exito: true, mensaje: "Habitación creada exitosamente" };
+    } catch (error) {
+        console.error("Error en el servidor:", error);
+        return { exito: false, mensaje: "Error interno al guardar" };
+    }
 }
 
 /**
@@ -30,9 +65,10 @@ async function obtenerHabitaciones() {
  */
 async function obtenerHabitacionPorNum(num) {
     try {
-        const snapshot = await habitacionesBD.where("num", "==", num).get();
+        // Convertimos el parámetro a número antes de la consulta
+        const numBusqueda = parseInt(num);
+        const snapshot = await habitacionesBD.where("num", "==", numBusqueda).get();
         if (snapshot.empty) return null;
-
         const doc = snapshot.docs[0];
         return { id: doc.id, ...doc.data() };
     } catch (error) {
@@ -44,28 +80,6 @@ async function obtenerHabitacionPorNum(num) {
 /**
  * Crear nueva habitación
  */
-async function nuevaHabitacion(datos) {
-    try {
-        const instanciaHabitacion = new Habitacion(datos);
-        const datosHabitacion = instanciaHabitacion.obtenerDatos;
-
-        if (!validarDatos(datosHabitacion)) {
-            return { exito: false, mensaje: "Datos inválidos" };
-        }
-
-        // Verificar que no exista una habitación con el mismo número
-        const existente = await obtenerHabitacionPorNum(datosHabitacion.num);
-        if (existente) {
-            return { exito: false, mensaje: "Ya existe una habitación con ese número" };
-        }
-
-        await habitacionesBD.doc().set(datosHabitacion);
-        return { exito: true, mensaje: "Habitación creada exitosamente" };
-    } catch (error) {
-        console.error("Error creando habitación:", error);
-        return { exito: false, mensaje: "Error al crear habitación" };
-    }
-}
 
 /**
  * Modificar habitación existente

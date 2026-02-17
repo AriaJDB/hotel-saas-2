@@ -9,13 +9,13 @@ const AdminDashboard = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [articulos, setArticulos] = useState([]);
     const [pedidos, setPedidos] = useState([]);
-    
+
     // Estados para modales
     const [modalAbierto, setModalAbierto] = useState(false);
     const [tipoModal, setTipoModal] = useState(''); // 'habitacion', 'reservacion', 'usuario', 'articulo'
     const [modoModal, setModoModal] = useState('crear'); // 'crear' o 'editar'
     const [itemSeleccionado, setItemSeleccionado] = useState(null);
-    
+
     // Estados para formularios
     const [formHabitacion, setFormHabitacion] = useState({
         num_ha: '',
@@ -24,7 +24,8 @@ const AdminDashboard = () => {
         precio_noche: '',
         amenidades: '',
         estado: 'Disponible',
-        fotos: ''
+        ultima_lim: '',
+        id_em: ''
     });
 
     const [formReservacion, setFormReservacion] = useState({
@@ -113,20 +114,22 @@ const AdminDashboard = () => {
     };
 
     const guardarHabitacion = async () => {
-        try {
-            if (modoModal === 'crear') {
-                await axios.post('http://localhost:3000/habitaciones', formHabitacion);
-            } else {
-                await axios.put(`http://localhost:3000/habitaciones/${itemSeleccionado.id}`, formHabitacion);
-            }
-            cargarDatos();
-            cerrarModal();
-            alert('Habitación guardada exitosamente');
-        } catch (error) {
-            console.error('Error guardando habitación:', error);
-            alert('Error al guardar habitación');
-        }
-    };
+  try {
+    if (modoModal === 'crear') {
+      // Cambio de la URL a /habitaciones/nueva según tu archivo de rutas
+      await axios.post('http://localhost:3000/habitaciones/nueva', formHabitacion); 
+    } else {
+      // Ajuste de URL para edición
+      await axios.put(`http://localhost:3000/habitaciones/${itemSeleccionado.num}`, formHabitacion);
+    }
+    cargarDatos();
+    cerrarModal();
+    alert('Habitación guardada exitosamente');
+  } catch (error) {
+    console.error('Error guardando habitación:', error);
+    alert('Error al guardar habitación');
+  }
+};
 
     const eliminarHabitacion = async (id) => {
         if (window.confirm('¿Estás seguro de eliminar esta habitación?')) {
@@ -680,7 +683,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formHabitacion.num_ha}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, num_ha: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, num_ha: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -689,7 +692,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formHabitacion.piso}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, piso: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, piso: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -697,7 +700,7 @@ const AdminDashboard = () => {
                                         <label>Tipo</label>
                                         <select
                                             value={formHabitacion.tipo}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, tipo: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, tipo: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Individual">Individual</option>
@@ -711,7 +714,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formHabitacion.precio_noche}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, precio_noche: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, precio_noche: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -720,7 +723,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             value={formHabitacion.amenidades}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, amenidades: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, amenidades: e.target.value })}
                                             className="form-input"
                                             placeholder="WiFi, TV, Aire acondicionado"
                                         />
@@ -729,7 +732,7 @@ const AdminDashboard = () => {
                                         <label>Estado</label>
                                         <select
                                             value={formHabitacion.estado}
-                                            onChange={(e) => setFormHabitacion({...formHabitacion, estado: e.target.value})}
+                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, estado: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Disponible">Disponible</option>
@@ -749,7 +752,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             value={formReservacion.id_usuario}
-                                            onChange={(e) => setFormReservacion({...formReservacion, id_usuario: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, id_usuario: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -757,7 +760,7 @@ const AdminDashboard = () => {
                                         <label>Número de Habitación</label>
                                         <select
                                             value={formReservacion.num_ha}
-                                            onChange={(e) => setFormReservacion({...formReservacion, num_ha: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, num_ha: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="">Seleccione habitación</option>
@@ -771,7 +774,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="date"
                                             value={formReservacion.fecha_entrada}
-                                            onChange={(e) => setFormReservacion({...formReservacion, fecha_entrada: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, fecha_entrada: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -780,7 +783,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="date"
                                             value={formReservacion.fecha_salida}
-                                            onChange={(e) => setFormReservacion({...formReservacion, fecha_salida: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, fecha_salida: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -789,7 +792,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formReservacion.num_huespedes}
-                                            onChange={(e) => setFormReservacion({...formReservacion, num_huespedes: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, num_huespedes: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -797,7 +800,7 @@ const AdminDashboard = () => {
                                         <label>Método de Pago</label>
                                         <select
                                             value={formReservacion.metodo_pago}
-                                            onChange={(e) => setFormReservacion({...formReservacion, metodo_pago: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, metodo_pago: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Tarjeta">Tarjeta</option>
@@ -809,7 +812,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formReservacion.total}
-                                            onChange={(e) => setFormReservacion({...formReservacion, total: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, total: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -818,7 +821,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formReservacion.pendiente_pago}
-                                            onChange={(e) => setFormReservacion({...formReservacion, pendiente_pago: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, pendiente_pago: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -826,7 +829,7 @@ const AdminDashboard = () => {
                                         <label>Estado</label>
                                         <select
                                             value={formReservacion.estado_reserva}
-                                            onChange={(e) => setFormReservacion({...formReservacion, estado_reserva: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, estado_reserva: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Pendiente">Pendiente</option>
@@ -840,7 +843,7 @@ const AdminDashboard = () => {
                                         <label>Notas</label>
                                         <textarea
                                             value={formReservacion.notas}
-                                            onChange={(e) => setFormReservacion({...formReservacion, notas: e.target.value})}
+                                            onChange={(e) => setFormReservacion({ ...formReservacion, notas: e.target.value })}
                                             className="form-input"
                                             rows="3"
                                         ></textarea>
@@ -856,7 +859,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             value={formUsuario.nombre}
-                                            onChange={(e) => setFormUsuario({...formUsuario, nombre: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, nombre: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -865,7 +868,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             value={formUsuario.apellidos}
-                                            onChange={(e) => setFormUsuario({...formUsuario, apellidos: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, apellidos: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -874,7 +877,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="email"
                                             value={formUsuario.correo}
-                                            onChange={(e) => setFormUsuario({...formUsuario, correo: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, correo: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -883,7 +886,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="tel"
                                             value={formUsuario.telefono}
-                                            onChange={(e) => setFormUsuario({...formUsuario, telefono: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, telefono: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -892,7 +895,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="password"
                                             value={formUsuario.password}
-                                            onChange={(e) => setFormUsuario({...formUsuario, password: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, password: e.target.value })}
                                             className="form-input"
                                             placeholder={modoModal === 'editar' ? 'Dejar en blanco para no cambiar' : ''}
                                         />
@@ -901,7 +904,7 @@ const AdminDashboard = () => {
                                         <label>Tipo de Usuario</label>
                                         <select
                                             value={formUsuario.tipo}
-                                            onChange={(e) => setFormUsuario({...formUsuario, tipo: e.target.value})}
+                                            onChange={(e) => setFormUsuario({ ...formUsuario, tipo: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="usuario">Usuario</option>
@@ -920,7 +923,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             value={formArticulo.nombre}
-                                            onChange={(e) => setFormArticulo({...formArticulo, nombre: e.target.value})}
+                                            onChange={(e) => setFormArticulo({ ...formArticulo, nombre: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -929,7 +932,7 @@ const AdminDashboard = () => {
                                         <input
                                             type="number"
                                             value={formArticulo.precio}
-                                            onChange={(e) => setFormArticulo({...formArticulo, precio: e.target.value})}
+                                            onChange={(e) => setFormArticulo({ ...formArticulo, precio: e.target.value })}
                                             className="form-input"
                                         />
                                     </div>
@@ -937,7 +940,7 @@ const AdminDashboard = () => {
                                         <label>Categoría</label>
                                         <select
                                             value={formArticulo.categoria}
-                                            onChange={(e) => setFormArticulo({...formArticulo, categoria: e.target.value})}
+                                            onChange={(e) => setFormArticulo({ ...formArticulo, categoria: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Restaurante">Restaurante</option>
@@ -948,7 +951,7 @@ const AdminDashboard = () => {
                                         <label>Disponibilidad</label>
                                         <select
                                             value={formArticulo.disponibilidad}
-                                            onChange={(e) => setFormArticulo({...formArticulo, disponibilidad: e.target.value})}
+                                            onChange={(e) => setFormArticulo({ ...formArticulo, disponibilidad: e.target.value })}
                                             className="form-input"
                                         >
                                             <option value="Disponible">Disponible</option>
@@ -959,7 +962,7 @@ const AdminDashboard = () => {
                                         <label>Descripción</label>
                                         <textarea
                                             value={formArticulo.descripcion}
-                                            onChange={(e) => setFormArticulo({...formArticulo, descripcion: e.target.value})}
+                                            onChange={(e) => setFormArticulo({ ...formArticulo, descripcion: e.target.value })}
                                             className="form-input"
                                             rows="3"
                                         ></textarea>
@@ -970,8 +973,8 @@ const AdminDashboard = () => {
 
                         <div className="modal-footer">
                             <button className="btn-secondary" onClick={cerrarModal}>Cancelar</button>
-                            <button 
-                                className="btn-primary" 
+                            <button
+                                className="btn-primary"
                                 onClick={() => {
                                     if (tipoModal === 'habitacion') guardarHabitacion();
                                     else if (tipoModal === 'reservacion') guardarReservacion();

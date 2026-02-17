@@ -12,6 +12,7 @@ async function nuevoUsuario(datos) {
     // Aceptar tanto 'password' como 'contrasena'
     const passwordPlano = datos.password || datos.contrasena;
 
+    
     if (!passwordPlano) {
         console.error("Error: No se recibió contraseña");
         return false;
