@@ -1,14 +1,13 @@
 class Habitacion {
     constructor(datos) {
-        // Mapeamos num_ha que viene del front a num del modelo
-        this.num = datos.num_ha || datos.num; 
+        this.num = datos.num_ha || datos.num;
         this.piso = datos.piso;
         this.tipo = datos.tipo;
         this.precio_noche = datos.precio_noche;
         this.amenidades = datos.amenidades;
         this.estado = datos.estado;
-        this.ultima_lim = datos.ultima_lim || null; // Campo de la imagen
-        this.id_em = datos.id_em || null;           // Campo de la imagen
+        this.ultima_lim = datos.ultima_lim || null;
+        this.id_em = datos.id_em || null;
     }
 
     set num(val) {
@@ -38,7 +37,15 @@ class Habitacion {
         if (!isNaN(precio) && precio > 0) this._precio_noche = parseFloat(precio);
     }
 
-    set amenidades(amenidades) { this._amenidades = amenidades; }
+    set amenidades(amenidades) {
+        if (Array.isArray(amenidades)) {
+            this._amenidades = amenidades;
+        } else if (typeof amenidades === 'string' && amenidades.trim() !== "") {
+            this._amenidades = amenidades.split(',').map(a => a.trim());
+        } else {
+            this._amenidades = [];
+        }
+    }
 
 
     set ultima_lim(fecha) { this._ultima_lim = fecha; }

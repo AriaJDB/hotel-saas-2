@@ -1,10 +1,7 @@
 const Habitacion = require("../clases/Habitacion");
 const { habitacionesBD } = require("./conexion");
 
-// habitacionesBD.js
-
 function validarDatos(habitacion) {
-    // Verificamos que los campos obligatorios existan en el objeto procesado por la clase
     return habitacion.num !== undefined &&
            habitacion.tipo !== undefined &&
            habitacion.precio_noche !== undefined &&
@@ -13,7 +10,6 @@ function validarDatos(habitacion) {
 
 async function nuevaHabitacion(datos) {
     try {
-        // Unificamos los nombres: el frontend envía 'num_ha' pero el modelo usa 'num'
         const datosParaModelo = {
             ...datos,
             num: datos.num_ha, // Mapeo crítico
@@ -34,7 +30,6 @@ async function nuevaHabitacion(datos) {
             return { exito: false, mensaje: "Ya existe una habitación con ese número" };
         }
 
-        // Se guarda en la colección 'habitaciones' definida en conexion.js [cite: 17]
         await habitacionesBD.doc().set(datosValidados);
         return { exito: true, mensaje: "Habitación creada exitosamente" };
     } catch (error) {
@@ -60,9 +55,7 @@ async function obtenerHabitaciones() {
     }
 }
 
-/**
- * Obtener habitación por número
- */
+
 async function obtenerHabitacionPorNum(num) {
     try {
         // Convertimos el parámetro a número antes de la consulta
@@ -84,17 +77,22 @@ async function obtenerHabitacionPorNum(num) {
 /**
  * Modificar habitación existente
  */
-async function modificarHabitacion(num, datos) {
+/**
+ * Modificar habitación existente
+ */
+async function modificarHabitacion(id, datos) { // Usamos id de documento
     try {
-        const snapshot = await habitacionesBD.where("num", "==", num).get();
-        if (snapshot.empty) {
+        const docRef = habitacionesBD.doc(id);
+        const res = await docRef.get();
+        
+        if (!res.exists) {
             return { exito: false, mensaje: "Habitación no encontrada" };
         }
 
-        const doc = snapshot.docs[0];
-        const datosActuales = doc.data();
-        const datosActualizados = { ...datosActuales, ...datos };
-
+        // Combinamos datos actuales con los nuevos
+        const datosActualizados = { ...res.data(), ...datos };
+        
+        // Pasamos por la clase para validar tipos (int, array, etc.)
         const instanciaHabitacion = new Habitacion(datosActualizados);
         const datosValidados = instanciaHabitacion.obtenerDatos;
 
@@ -102,11 +100,24 @@ async function modificarHabitacion(num, datos) {
             return { exito: false, mensaje: "Datos inválidos" };
         }
 
-        await doc.ref.update(datosValidados);
+        await docRef.update(datosValidados);
         return { exito: true, mensaje: "Habitación actualizada exitosamente" };
     } catch (error) {
         console.error("Error modificando habitación:", error);
         return { exito: false, mensaje: "Error al modificar habitación" };
+    }
+}
+
+/**
+ * Eliminar habitación
+ */
+async function eliminarHabitacionBD(id) {
+    try {
+        await habitacionesBD.doc(id).delete();
+        return { exito: true, mensaje: "Habitación eliminada" };
+    } catch (error) {
+        console.error("Error eliminando habitación:", error);
+        return { exito: false, mensaje: "Error al eliminar" };
     }
 }
 
@@ -159,5 +170,6 @@ module.exports = {
     nuevaHabitacion,
     modificarHabitacion,
     cambiarEstadoHabitacion,
-    obtenerHabitacionesDisponibles
+    obtenerHabitacionesDisponibles,
+    eliminarHabitacionBD
 };

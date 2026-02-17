@@ -18,15 +18,18 @@ const AdminDashboard = () => {
 
     // Estados para formularios
     const [formHabitacion, setFormHabitacion] = useState({
+
         num_ha: '',
         piso: '',
         tipo: 'Individual',
         precio_noche: '',
-        amenidades: '',
+        amenidades: [],
         estado: 'Disponible',
         ultima_lim: '',
         id_em: ''
     });
+
+    const [nuevaAmenidad, setNuevaAmenidad] = useState('');
 
     const [formReservacion, setFormReservacion] = useState({
         id_usuario: '',
@@ -96,8 +99,14 @@ const AdminDashboard = () => {
     const abrirModalHabitacion = (modo, habitacion = null) => {
         setTipoModal('habitacion');
         setModoModal(modo);
+        setNuevaAmenidad('');
+
         if (habitacion) {
-            setFormHabitacion(habitacion);
+            setFormHabitacion({
+                ...habitacion,
+                num_ha: habitacion.num,
+                amenidades: habitacion.amenidades || []
+            });
             setItemSeleccionado(habitacion);
         } else {
             setFormHabitacion({
@@ -105,31 +114,30 @@ const AdminDashboard = () => {
                 piso: '',
                 tipo: 'Individual',
                 precio_noche: '',
-                amenidades: '',
-                estado: 'Disponible',
-                fotos: ''
+                amenidades: [],
+                estado: 'Libre',
+                ultima_lim: '',
+                id_em: ''
             });
         }
         setModalAbierto(true);
     };
 
     const guardarHabitacion = async () => {
-  try {
-    if (modoModal === 'crear') {
-      // Cambio de la URL a /habitaciones/nueva según tu archivo de rutas
-      await axios.post('http://localhost:3000/habitaciones/nueva', formHabitacion); 
-    } else {
-      // Ajuste de URL para edición
-      await axios.put(`http://localhost:3000/habitaciones/${itemSeleccionado.num}`, formHabitacion);
-    }
-    cargarDatos();
-    cerrarModal();
-    alert('Habitación guardada exitosamente');
-  } catch (error) {
-    console.error('Error guardando habitación:', error);
-    alert('Error al guardar habitación');
-  }
-};
+        try {
+            if (modoModal === 'crear') {
+                await axios.post('http://localhost:3000/habitaciones/nueva', formHabitacion);
+            } else {
+                await axios.put(`http://localhost:3000/habitaciones/${itemSeleccionado.id}`, formHabitacion);
+            }
+            cargarDatos();
+            cerrarModal();
+            alert('Habitación guardada con éxito');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al procesar la solicitud');
+        }
+    };
 
     const eliminarHabitacion = async (id) => {
         if (window.confirm('¿Estás seguro de eliminar esta habitación?')) {
@@ -142,6 +150,23 @@ const AdminDashboard = () => {
                 alert('Error al eliminar habitación');
             }
         }
+    };
+
+    const agregarAmenidad = () => {
+        if (nuevaAmenidad.trim() !== '') {
+            setFormHabitacion({
+                ...formHabitacion,
+                amenidades: [...(formHabitacion.amenidades || []), nuevaAmenidad.trim()]
+            });
+            setNuevaAmenidad(''); // Limpiar el input
+        }
+    };
+
+    const eliminarAmenidad = (indexAEliminar) => {
+        setFormHabitacion({
+            ...formHabitacion,
+            amenidades: formHabitacion.amenidades.filter((_, index) => index !== indexAEliminar)
+        });
     };
 
     // ========== FUNCIONES CRUD RESERVACIONES ==========
@@ -502,7 +527,11 @@ const AdminDashboard = () => {
                                             <td>Piso {hab.piso}</td>
                                             <td>{hab.tipo}</td>
                                             <td>${hab.precio_noche}</td>
-                                            <td>{hab.amenidades}</td>
+                                            <td>
+                                                {hab.amenidades && hab.amenidades.length > 0
+                                                    ? hab.amenidades.join(', ')
+                                                    : 'Sin amenidades'}
+                                            </td>
                                             <td><span className={`badge ${hab.estado === 'Disponible' ? 'badge-success' : 'badge-warning'}`}>{hab.estado}</span></td>
                                             <td>
                                                 <button className="btn-icon" onClick={() => abrirModalHabitacion('editar', hab)}>✏️</button>
@@ -718,15 +747,40 @@ const AdminDashboard = () => {
                                             className="form-input"
                                         />
                                     </div>
-                                    <div className="form-group">
+                                    <div className="form-group form-group-full">
                                         <label>Amenidades</label>
-                                        <input
-                                            type="text"
-                                            value={formHabitacion.amenidades}
-                                            onChange={(e) => setFormHabitacion({ ...formHabitacion, amenidades: e.target.value })}
-                                            className="form-input"
-                                            placeholder="WiFi, TV, Aire acondicionado"
-                                        />
+                                        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                                            <input
+                                                type="text"
+                                                value={nuevaAmenidad}
+                                                onChange={(e) => setNuevaAmenidad(e.target.value)}
+                                                className="form-input"
+                                                placeholder="Ej: WiFi, Minibar..."
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn-primary"
+                                                onClick={agregarAmenidad}
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+
+                                        {/* Lista de amenidades agregadas */}
+                                        <div className="amenidades-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                            {formHabitacion.amenidades && formHabitacion.amenidades.map((amenidad, index) => (
+                                                <span key={index} className="badge badge-info" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    {amenidad}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => eliminarAmenidad(index)}
+                                                        style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontWeight: 'bold' }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                     <div className="form-group">
                                         <label>Estado</label>
