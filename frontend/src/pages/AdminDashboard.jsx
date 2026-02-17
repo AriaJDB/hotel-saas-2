@@ -1066,4 +1066,58 @@ const AdminDashboard = () => {
     );
 };
 
+// ===== LÓGICA DE BÚSQUEDA (en memoria, sobre los datos ya cargados) =====
+const buscarHabitaciones = (data, filtros) => {
+    let resultado = [...data];
+
+    // 1. Búsqueda simple por texto (número, tipo, amenidades)
+    if (filtros.q.trim()) {
+        const q = filtros.q.trim().toLowerCase();
+
+        resultado = resultado.filter(hab => {
+            const amenidadesTexto = Array.isArray(hab.amenidades)
+                ? hab.amenidades.join(', ').toLowerCase()
+                : (hab.amenidades || '').toLowerCase();
+
+            return (
+                String(hab.num_ha).includes(q) ||
+                (hab.tipo || '').toLowerCase().includes(q) ||
+                amenidadesTexto.includes(q)
+            );
+        });
+    }
+
+    // 2. Filtro por tipo
+    if (filtros.tipo) {
+        resultado = resultado.filter(hab => hab.tipo === filtros.tipo);
+    }
+
+    // 3. Filtro por estado
+    if (filtros.estado) {
+        resultado = resultado.filter(hab => hab.estado === filtros.estado);
+    }
+
+    // 4. Rango de precio
+    if (filtros.min !== '') {
+        resultado = resultado.filter(
+            hab => Number(hab.precio_noche) >= Number(filtros.min)
+        );
+    }
+
+    if (filtros.max !== '') {
+        resultado = resultado.filter(
+            hab => Number(hab.precio_noche) <= Number(filtros.max)
+        );
+    }
+
+    // 5. Filtro por piso
+    if (filtros.piso !== '') {
+        resultado = resultado.filter(
+            hab => Number(hab.piso) === Number(filtros.piso)
+        );
+    }
+
+    return resultado;
+};
+
 export default AdminDashboard;
