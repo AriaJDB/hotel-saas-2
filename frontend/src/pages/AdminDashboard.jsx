@@ -108,11 +108,13 @@ const AdminDashboard = () => {
                 axios.get('http://localhost:3000/articulos'),
                 axios.get('http://localhost:3000/pedidos')
             ]);
-            setHabitaciones(habRes.data);
-            setReservaciones(resRes.data);
-            setUsuarios(usuRes.data);
-            setArticulos(artRes.data);
-            setPedidos(pedRes.data);
+            // /habitaciones devuelve { datos, total, pagina, ... } (paginado)
+            const habData = habRes.data;
+            setHabitaciones(Array.isArray(habData) ? habData : (Array.isArray(habData?.datos) ? habData.datos : []));
+            setReservaciones(Array.isArray(resRes.data) ? resRes.data : (Array.isArray(resRes.data?.datos) ? resRes.data.datos : []));
+            setUsuarios(Array.isArray(usuRes.data) ? usuRes.data : (Array.isArray(usuRes.data?.datos) ? usuRes.data.datos : []));
+            setArticulos(Array.isArray(artRes.data) ? artRes.data : (Array.isArray(artRes.data?.datos) ? artRes.data.datos : []));
+            setPedidos(Array.isArray(pedRes.data) ? pedRes.data : (Array.isArray(pedRes.data?.datos) ? pedRes.data.datos : []));
         } catch (error) {
             console.error('Error cargando datos:', error);
         }
