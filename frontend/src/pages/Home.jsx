@@ -39,10 +39,14 @@ const Home = () => {
     const cargarHabitaciones = async () => {
         try {
             const response = await axios.get('http://localhost:3000/habitaciones');
-            // El backend retorna { datos: [...], total, pagina, ... }
-            const lista = Array.isArray(response.data)
-                ? response.data
-                : (response.data.datos || []);
+            // El backend retorna { datos: [...], total, pagina, ... } o un array directo
+            let lista = [];
+            if (Array.isArray(response.data)) {
+                lista = response.data;
+            } else if (response.data && Array.isArray(response.data.datos)) {
+                lista = response.data.datos;
+            }
+
             setHabitaciones(lista);
 
             // Inicializar el índice de imagen para cada habitación
@@ -53,6 +57,7 @@ const Home = () => {
             setCurrentImages(initialImages);
         } catch (error) {
             console.error('Error cargando habitaciones:', error);
+            setHabitaciones([]);
         }
     };
 

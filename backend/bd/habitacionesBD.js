@@ -40,6 +40,22 @@ async function nuevaHabitacion(datos) {
 
 
 
+async function obtenerHabitacionPorNum(num) {
+    try {
+        const snapshot = await habitacionesBD.where("num", "==", Number(num)).get();
+        if (snapshot.empty) return null;
+        const doc = snapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+    } catch (error) {
+        console.error("Error obteniendo habitación por número:", error);
+        return null;
+    }
+}
+
+async function obtenerHabitacionesFiltros(filtros = {}) {
+    return obtenerHabitacionesFiltradas(filtros);
+}
+
 async function obtenerHabitacionesFiltradas(filtros = {}) {
     try {
         const snapshot = await habitacionesBD.get();
@@ -210,5 +226,7 @@ module.exports = {
     cambiarEstadoHabitacion,
     obtenerHabitacionesDisponibles,
     eliminarHabitacionBD,
-    obtenerHabitacionesFiltradas
+    obtenerHabitacionesFiltradas,
+    obtenerHabitacionPorNum,
+    obtenerHabitacionesFiltros
 };
