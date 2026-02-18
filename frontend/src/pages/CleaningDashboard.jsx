@@ -12,14 +12,44 @@ const CleaningDashboard = () => {
         cargarHabitaciones();
     }, []);
 
-    const cargarHabitaciones = async () => {
-        try {
-            const response = await axios.get('http://localhost:3000/habitaciones');
-            setHabitaciones(response.data);
-        } catch (error) {
-            console.error('Error cargando habitaciones:', error);
-        }
-    };
+    // Reemplaza tu actual cargarHabitaciones y aplicarBusqueda
+// Dentro de ClientDashboard.jsx
+
+const cargarHabitaciones = async (filtrosActivos = {}) => {
+    try {
+        setLoading(true);
+        // IMPORTANTE: Se pasan los filtros en la propiedad 'params'
+        const response = await axios.get('http://localhost:3000/habitaciones', { 
+            params: filtrosActivos 
+        });
+        
+        // Filtramos disponibilidad localmente o en el backend
+        const disponibles = response.data.filter(h => h.estado === 'Disponible' || h.estado === 'Libre');
+        setHabitaciones(disponibles);
+        
+        // Reiniciar carruseles para los nuevos resultados
+        const initialImages = {};
+        disponibles.forEach(hab => { initialImages[hab.id] = 0; });
+        setCurrentImages(initialImages);
+        setError(null);
+    } catch (error) {
+        setError('Error al conectar con el servidor');
+    } finally {
+        setLoading(false);
+    }
+};
+
+// Esta es la función que debe ejecutar tu botón "Aplicar Filtros"
+const aplicarBusqueda = () => {
+    console.log("Enviando filtros:", filtros); // Para depuración
+    cargarHabitaciones(filtros);
+};
+
+const limpiarFiltros = () => {
+    const reset = { q: '', tipoSeleccionado: '', min: '', max: '', amenidades: [] };
+    setFiltros(reset);
+    cargarHabitaciones(reset);
+};
 
     const cerrarSesion = () => {
         localStorage.removeItem('usuario');

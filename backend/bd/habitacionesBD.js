@@ -38,35 +38,67 @@ async function nuevaHabitacion(datos) {
     }
 }
 
-/**
- * Obtener todas las habitaciones
- */
-async function obtenerHabitaciones() {
+
+
+async function obtenerHabitacionesFiltradas(filtros = {}) {
     try {
         const snapshot = await habitacionesBD.get();
-        const habitaciones = [];
-        snapshot.forEach(doc => {
-            habitaciones.push({ id: doc.id, ...doc.data() });
+
+        let resultado = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        // Solo disponibles
+        resultado = resultado.filter(h => h.estado === "Disponible");
+
+        // 🔎 búsqueda texto
+        if (filtros.q) {
+            const q = filtros.q.toLowerCase().trim();
+
+            resultado = resultado.filter(h =>
+                String(h.num_ha).includes(q) ||
+                (h.tipo || "").toLowerCase().includes(q) ||
+                (h.amenidades || "").toLowerCase().includes(q)
+            );
+        }
+
+        // Tipo habitación
+        if (filtros.tipo) {
+            resultado = resultado.filter(h => h.tipo === filtros.tipo);
+        }
+
+        // Precio mínimo
+        if (filtros.min) {
+            resultado = resultado.filter(
+                h => Number(h.precio_noche) >= Number(filtros.min)
+            );
+        }
+
+        // Precio máximo
+        if (filtros.max) {
+            resultado = resultado.filter(
+                h => Number(h.precio_noche) <= Number(filtros.max)
+            );
+        }
+
+        // Ordenamiento
+        resultado.sort((a, b) => {
+            switch (filtros.sort) {
+                case "precio_desc":
+                    return Number(b.precio_noche) - Number(a.precio_noche);
+                case "tipo":
+                    return (a.tipo || "").localeCompare(b.tipo || "");
+                default:
+                    return Number(a.precio_noche) - Number(b.precio_noche);
+            }
         });
-        return habitaciones;
+
+        return resultado;
+
     } catch (error) {
-        console.error("Error obteniendo habitaciones:", error);
+        console.error(error);
         return [];
-    }
-}
-
-
-async function obtenerHabitacionPorNum(num) {
-    try {
-        // Convertimos el parámetro a número antes de la consulta
-        const numBusqueda = parseInt(num);
-        const snapshot = await habitacionesBD.where("num", "==", numBusqueda).get();
-        if (snapshot.empty) return null;
-        const doc = snapshot.docs[0];
-        return { id: doc.id, ...doc.data() };
-    } catch (error) {
-        console.error("Error obteniendo habitación:", error);
-        return null;
     }
 }
 
@@ -165,11 +197,10 @@ async function obtenerHabitacionesDisponibles(fechaEntrada, fechaSalida) {
 }
 
 module.exports = {
-    obtenerHabitaciones,
-    obtenerHabitacionPorNum,
     nuevaHabitacion,
     modificarHabitacion,
     cambiarEstadoHabitacion,
     obtenerHabitacionesDisponibles,
-    eliminarHabitacionBD
+    eliminarHabitacionBD,
+    obtenerHabitacionesFiltradas
 };

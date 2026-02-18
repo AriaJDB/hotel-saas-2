@@ -1,18 +1,15 @@
 const rutas = require("express").Router();
 const {
-    obtenerHabitaciones,
+    obtenerHabitacionesFiltradas,
     obtenerHabitacionPorNum,
     nuevaHabitacion,
     modificarHabitacion,
     cambiarEstadoHabitacion,
-    obtenerHabitacionesDisponibles
+    obtenerHabitacionesDisponibles,
+    obtenerHabitacionesFiltros
 } = require("../bd/habitacionesBD");
 
-// Obtener todas las habitaciones
-rutas.get("/", async (req, res) => {
-    const habitaciones = await obtenerHabitaciones();
-    res.status(200).json(habitaciones);
-});
+
 
 // Obtener habitación específica por número
 rutas.get("/:num", async (req, res) => {
@@ -37,16 +34,31 @@ rutas.post("/nueva", async (req, res) => {
     res.status(resultado.exito ? 201 : 400).json(resultado);
 });
 
-// Actualizar habitación completa
-rutas.put("/:num", async (req, res) => {
-    const resultado = await modificarHabitacion(req.params.num, req.body);
-    res.status(resultado.exito ? 200 : 400).json(resultado);
-});
+
 
 // Actualizar solo el estado de la habitación
 rutas.patch("/:num/estado", async (req, res) => {
     const resultado = await cambiarEstadoHabitacion(req.params.num, req.body.estado);
     res.status(resultado.exito ? 200 : 400).json(resultado);
+});
+
+rutas.get("/habitaciones", async (req, res) => {
+    const filtros = req.query;
+    const habitaciones = await obtenerHabitacionesFiltros(filtros);
+    res.json(habitaciones);
+});
+
+rutas.get("/", async (req, res) => {
+    try {
+        const habitaciones =
+            await obtenerHabitacionesFiltradas(req.query);
+
+        res.json(habitaciones);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error servidor" });
+    }
 });
 
 module.exports = rutas;

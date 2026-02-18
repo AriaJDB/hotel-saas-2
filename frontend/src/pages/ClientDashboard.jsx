@@ -60,6 +60,21 @@ const ClientDashboard = () => {
         }
     };
 
+    const obtenerHabitaciones = async () => {
+    const res = await axios.get("/api/habitaciones", {
+        params: {
+            q: busqueda,
+            tipo,
+            min,
+            max,
+            sort
+        }
+    });
+
+    setHabitaciones(res.data);
+};
+
+
     // Funciones del carrusel
     const nextImage = (habId, tipo) => {
         const images = roomImages[tipo] || roomImages['Individual'];
@@ -522,53 +537,7 @@ const ClientDashboard = () => {
                 </div>
             </footer>
 
-            <style>{`
-                .loading-container {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    padding: 4rem 2rem;
-                    color: var(--text-secondary);
-                }
-
-                .loading-spinner {
-                    width: 3rem;
-                    height: 3rem;
-                    border: 3px solid var(--border-color);
-                    border-top-color: var(--primary-blue);
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;
-                    margin-bottom: 1rem;
-                }
-
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-
-                .error-message {
-                    text-align: center;
-                    padding: 3rem 2rem;
-                    background: #fee2e2;
-                    border-radius: 0.75rem;
-                    color: #991b1b;
-                }
-
-                .error-message p {
-                    margin-bottom: 1rem;
-                }
-
-                .empty-state {
-                    text-align: center;
-                    padding: 4rem 2rem;
-                    color: var(--text-secondary);
-                }
-
-                .empty-state h3 {
-                    font-size: 1.5rem;
-                    color: var(--text-primary);
-                    margin-bottom: 0.5rem;
-                }
-            `}</style>
+            
         </div>
     );
 };

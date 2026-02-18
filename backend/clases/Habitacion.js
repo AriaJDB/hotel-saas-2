@@ -28,7 +28,6 @@ class Habitacion {
     }
 
     set estado(estado) {
-        // Sincronizado con tu imagen: ocupada, libre, limpieza, mantenimiento
         const estadosValidos = ["Ocupada", "Disponible", "Limpieza", "Mantenimiento"];
         if (estadosValidos.includes(estado)) this._estado = estado;
     }
