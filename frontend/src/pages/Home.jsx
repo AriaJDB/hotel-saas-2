@@ -39,11 +39,15 @@ const Home = () => {
     const cargarHabitaciones = async () => {
         try {
             const response = await axios.get('http://localhost:3000/habitaciones');
-            setHabitaciones(response.data);
-            
+            // El backend retorna { datos: [...], total, pagina, ... }
+            const lista = Array.isArray(response.data)
+                ? response.data
+                : (response.data.datos || []);
+            setHabitaciones(lista);
+
             // Inicializar el índice de imagen para cada habitación
             const initialImages = {};
-            response.data.forEach(hab => {
+            lista.forEach(hab => {
                 initialImages[hab.id] = 0;
             });
             setCurrentImages(initialImages);
@@ -226,15 +230,15 @@ const Home = () => {
                                 <article key={hab.id} className="room-card">
                                     {/* Carrusel de imágenes */}
                                     <div className="room-carousel">
-                                        <img 
-                                            src={images[currentIndex]} 
+                                        <img
+                                            src={images[currentIndex]}
                                             alt={`${hab.tipo} - Imagen ${currentIndex + 1}`}
                                             className="room-carousel-image"
                                         />
-                                        
+
                                         {/* Botones de navegación */}
-                                        <button 
-                                            className="carousel-btn carousel-btn-prev" 
+                                        <button
+                                            className="carousel-btn carousel-btn-prev"
                                             onClick={() => prevImage(hab.id, hab.tipo)}
                                             aria-label="Imagen anterior"
                                         >
@@ -242,8 +246,8 @@ const Home = () => {
                                                 <polyline points="15 18 9 12 15 6"></polyline>
                                             </svg>
                                         </button>
-                                        <button 
-                                            className="carousel-btn carousel-btn-next" 
+                                        <button
+                                            className="carousel-btn carousel-btn-next"
                                             onClick={() => nextImage(hab.id, hab.tipo)}
                                             aria-label="Siguiente imagen"
                                         >
