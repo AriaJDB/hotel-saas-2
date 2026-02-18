@@ -2,6 +2,29 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/AdminStyles.css';
 
+// ========== COMPONENTE BUSCADOR (fuera del componente principal para evitar re-renders) ==========
+const Buscador = ({ valor, onChange, placeholder }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', borderRadius: '8px', padding: '8px 12px', minWidth: '260px' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input
+            type="text"
+            value={valor}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '0.875rem', color: '#334155', width: '100%' }}
+        />
+        {valor && (
+            <button
+                onClick={() => onChange('')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '1.1rem', lineHeight: 1, padding: 0 }}
+            >×</button>
+        )}
+    </div>
+);
+
 const AdminDashboard = () => {
     const [usuario, setUsuario] = useState(null);
     const [habitaciones, setHabitaciones] = useState([]);
@@ -12,13 +35,18 @@ const AdminDashboard = () => {
 
     // Estados para modales
     const [modalAbierto, setModalAbierto] = useState(false);
-    const [tipoModal, setTipoModal] = useState(''); // 'habitacion', 'reservacion', 'usuario', 'articulo'
-    const [modoModal, setModoModal] = useState('crear'); // 'crear' o 'editar'
+    const [tipoModal, setTipoModal] = useState('');
+    const [modoModal, setModoModal] = useState('crear');
     const [itemSeleccionado, setItemSeleccionado] = useState(null);
+
+    // ========== BUSCADORES ==========
+    const [busquedaHabitaciones, setBusquedaHabitaciones] = useState('');
+    const [busquedaReservaciones, setBusquedaReservaciones] = useState('');
+    const [busquedaUsuarios, setBusquedaUsuarios] = useState('');
+    const [busquedaArticulos, setBusquedaArticulos] = useState('');
 
     // Estados para formularios
     const [formHabitacion, setFormHabitacion] = useState({
-
         num_ha: '',
         piso: '',
         tipo: 'Individual',
@@ -61,7 +89,7 @@ const AdminDashboard = () => {
         disponibilidad: 'Disponible'
     });
 
-    const [vistaActual, setVistaActual] = useState('dashboard'); // dashboard, habitaciones, reservaciones, usuarios, articulos
+    const [vistaActual, setVistaActual] = useState('dashboard');
 
     useEffect(() => {
         const usuarioData = localStorage.getItem('usuario');
@@ -95,12 +123,84 @@ const AdminDashboard = () => {
         window.location.href = '/login';
     };
 
-    // ========== FUNCIONES CRUD HABITACIONES ==========
+    // ========== FILTROS EN MEMORIA ==========
+    const habitacionesFiltradas = habitaciones.filter(hab => {
+        const q = busquedaHabitaciones.toLowerCase();
+        const amenidadesTexto = Array.isArray(hab.amenidades)
+            ? hab.amenidades.join(', ').toLowerCase()
+            : (hab.amenidades || '').toLowerCase();
+        return (
+            String(hab.num_ha).includes(q) ||
+            (hab.tipo || '').toLowerCase().includes(q) ||
+            (hab.estado || '').toLowerCase().includes(q) ||
+            amenidadesTexto.includes(q)
+        );
+    });
+
+    const reservacionesFiltradas = reservaciones.filter(res => {
+        const q = busquedaReservaciones.toLowerCase();
+        return (
+            String(res.id || '').includes(q) ||
+            String(res.num_ha || '').includes(q) ||
+            (res.id_usuario || '').toLowerCase().includes(q) ||
+            (res.estado_reserva || '').toLowerCase().includes(q) ||
+            (res.fecha_entrada || '').includes(q)
+        );
+    });
+
+    const usuariosFiltrados = usuarios.filter(user => {
+        const q = busquedaUsuarios.toLowerCase();
+        return (
+            (user.nombre || '').toLowerCase().includes(q) ||
+            (user.apellidos || '').toLowerCase().includes(q) ||
+            (user.correo || '').toLowerCase().includes(q) ||
+            (user.tipo || '').toLowerCase().includes(q) ||
+            (user.telefono || '').includes(q)
+        );
+    });
+
+    const articulosFiltrados = articulos.filter(art => {
+        const q = busquedaArticulos.toLowerCase();
+        return (
+            (art.nombre || '').toLowerCase().includes(q) ||
+            (art.descripcion || '').toLowerCase().includes(q) ||
+            (art.categoria || '').toLowerCase().includes(q) ||
+            (art.disponibilidad || '').toLowerCase().includes(q)
+        );
+    });
+
+    useEffect(() => {
+        if (busquedaHabitaciones) {
+            console.log('%c[Admin] Habitaciones filtradas:', 'color: #6366f1; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(habitacionesFiltradas, null, 2));
+        }
+    }, [busquedaHabitaciones, habitaciones]);
+
+    useEffect(() => {
+        if (busquedaReservaciones) {
+            console.log('%c[Admin] Reservaciones filtradas:', 'color: #f59e0b; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(reservacionesFiltradas, null, 2));
+        }
+    }, [busquedaReservaciones, reservaciones]);
+
+    useEffect(() => {
+        if (busquedaUsuarios) {
+            console.log('%c[Admin] Usuarios filtrados:', 'color: #10b981; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(usuariosFiltrados, null, 2));
+        }
+    }, [busquedaUsuarios, usuarios]);
+
+    useEffect(() => {
+        if (busquedaArticulos) {
+            console.log('%c[Admin] Artículos filtrados:', 'color: #ef4444; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(articulosFiltrados, null, 2));
+        }
+    }, [busquedaArticulos, articulos]);
+
     const abrirModalHabitacion = (modo, habitacion = null) => {
         setTipoModal('habitacion');
         setModoModal(modo);
         setNuevaAmenidad('');
-
         if (habitacion) {
             setFormHabitacion({
                 ...habitacion,
@@ -115,7 +215,7 @@ const AdminDashboard = () => {
                 tipo: 'Individual',
                 precio_noche: '',
                 amenidades: [],
-                estado: 'Disponible',
+                estado: 'Libre',
                 ultima_lim: '',
                 id_em: ''
             });
@@ -158,7 +258,7 @@ const AdminDashboard = () => {
                 ...formHabitacion,
                 amenidades: [...(formHabitacion.amenidades || []), nuevaAmenidad.trim()]
             });
-            setNuevaAmenidad(''); // Limpiar el input
+            setNuevaAmenidad('');
         }
     };
 
@@ -169,7 +269,6 @@ const AdminDashboard = () => {
         });
     };
 
-    // ========== FUNCIONES CRUD RESERVACIONES ==========
     const abrirModalReservacion = (modo, reservacion = null) => {
         setTipoModal('reservacion');
         setModoModal(modo);
@@ -222,7 +321,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // ========== FUNCIONES CRUD USUARIOS ==========
     const abrirModalUsuario = (modo, usuario = null) => {
         setTipoModal('usuario');
         setModoModal(modo);
@@ -417,7 +515,6 @@ const AdminDashboard = () => {
                                     + Nueva Reservación
                                 </button>
                             </div>
-
                             <div className="table-container">
                                 <table className="data-table">
                                     <thead>
@@ -460,7 +557,6 @@ const AdminDashboard = () => {
                                     + Nueva Habitación
                                 </button>
                             </div>
-
                             <div className="rooms-admin-grid">
                                 {habitaciones.slice(0, 6).map(hab => (
                                     <div key={hab.id} className="room-admin-card">
@@ -502,9 +598,16 @@ const AdminDashboard = () => {
                     <div className="container">
                         <div className="section-header">
                             <h2 className="section-title">Gestión de Habitaciones</h2>
-                            <button className="btn-primary" onClick={() => abrirModalHabitacion('crear')}>
-                                + Nueva Habitación
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <Buscador
+                                    valor={busquedaHabitaciones}
+                                    onChange={setBusquedaHabitaciones}
+                                    placeholder="Buscar por número, tipo, estado…"
+                                />
+                                <button className="btn-primary" onClick={() => abrirModalHabitacion('crear')}>
+                                    + Nueva Habitación
+                                </button>
+                            </div>
                         </div>
 
                         <div className="table-container">
@@ -521,7 +624,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {habitaciones.map(hab => (
+                                    {habitacionesFiltradas.length > 0 ? habitacionesFiltradas.map(hab => (
                                         <tr key={hab.id}>
                                             <td>Hab. {hab.num_ha}</td>
                                             <td>Piso {hab.piso}</td>
@@ -538,7 +641,13 @@ const AdminDashboard = () => {
                                                 <button className="btn-icon btn-danger" onClick={() => eliminarHabitacion(hab.id)}>🗑️</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                                No se encontraron habitaciones
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -552,9 +661,16 @@ const AdminDashboard = () => {
                     <div className="container">
                         <div className="section-header">
                             <h2 className="section-title">Gestión de Reservaciones</h2>
-                            <button className="btn-primary" onClick={() => abrirModalReservacion('crear')}>
-                                + Nueva Reservación
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <Buscador
+                                    valor={busquedaReservaciones}
+                                    onChange={setBusquedaReservaciones}
+                                    placeholder="Buscar por ID, habitación, estado…"
+                                />
+                                <button className="btn-primary" onClick={() => abrirModalReservacion('crear')}>
+                                    + Nueva Reservación
+                                </button>
+                            </div>
                         </div>
 
                         <div className="table-container">
@@ -574,7 +690,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {reservaciones.map(res => (
+                                    {reservacionesFiltradas.length > 0 ? reservacionesFiltradas.map(res => (
                                         <tr key={res.id}>
                                             <td>#{res.id}</td>
                                             <td>{res.id_usuario}</td>
@@ -590,7 +706,13 @@ const AdminDashboard = () => {
                                                 <button className="btn-icon btn-danger" onClick={() => eliminarReservacion(res.id)}>🗑️</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="10" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                                No se encontraron reservaciones
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -604,9 +726,16 @@ const AdminDashboard = () => {
                     <div className="container">
                         <div className="section-header">
                             <h2 className="section-title">Gestión de Usuarios</h2>
-                            <button className="btn-primary" onClick={() => abrirModalUsuario('crear')}>
-                                + Nuevo Usuario
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <Buscador
+                                    valor={busquedaUsuarios}
+                                    onChange={setBusquedaUsuarios}
+                                    placeholder="Buscar por nombre, correo, tipo…"
+                                />
+                                <button className="btn-primary" onClick={() => abrirModalUsuario('crear')}>
+                                    + Nuevo Usuario
+                                </button>
+                            </div>
                         </div>
 
                         <div className="table-container">
@@ -622,7 +751,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {usuarios.map(user => (
+                                    {usuariosFiltrados.length > 0 ? usuariosFiltrados.map(user => (
                                         <tr key={user.id}>
                                             <td>#{user.id}</td>
                                             <td>{user.nombre} {user.apellidos}</td>
@@ -634,7 +763,13 @@ const AdminDashboard = () => {
                                                 <button className="btn-icon btn-danger" onClick={() => eliminarUsuario(user.id)}>🗑️</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                                No se encontraron usuarios
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -648,9 +783,16 @@ const AdminDashboard = () => {
                     <div className="container">
                         <div className="section-header">
                             <h2 className="section-title">Gestión de Artículos</h2>
-                            <button className="btn-primary" onClick={() => abrirModalArticulo('crear')}>
-                                + Nuevo Artículo
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                <Buscador
+                                    valor={busquedaArticulos}
+                                    onChange={setBusquedaArticulos}
+                                    placeholder="Buscar por nombre, categoría…"
+                                />
+                                <button className="btn-primary" onClick={() => abrirModalArticulo('crear')}>
+                                    + Nuevo Artículo
+                                </button>
+                            </div>
                         </div>
 
                         <div className="table-container">
@@ -667,7 +809,7 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {articulos.map(art => (
+                                    {articulosFiltrados.length > 0 ? articulosFiltrados.map(art => (
                                         <tr key={art.id}>
                                             <td>#{art.id}</td>
                                             <td>{art.nombre}</td>
@@ -680,7 +822,13 @@ const AdminDashboard = () => {
                                                 <button className="btn-icon btn-danger" onClick={() => eliminarArticulo(art.id)}>🗑️</button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="7" style={{ textAlign: 'center', padding: '2rem', color: '#94a3b8' }}>
+                                                No se encontraron artículos
+                                            </td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -757,16 +905,8 @@ const AdminDashboard = () => {
                                                 className="form-input"
                                                 placeholder="Ej: WiFi, Minibar..."
                                             />
-                                            <button
-                                                type="button"
-                                                className="btn-primary"
-                                                onClick={agregarAmenidad}
-                                            >
-                                                +
-                                            </button>
+                                            <button type="button" className="btn-primary" onClick={agregarAmenidad}>+</button>
                                         </div>
-
-                                        {/* Lista de amenidades agregadas */}
                                         <div className="amenidades-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                             {formHabitacion.amenidades && formHabitacion.amenidades.map((amenidad, index) => (
                                                 <span key={index} className="badge badge-info" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -775,9 +915,7 @@ const AdminDashboard = () => {
                                                         type="button"
                                                         onClick={() => eliminarAmenidad(index)}
                                                         style={{ background: 'none', border: 'none', color: 'red', cursor: 'pointer', fontWeight: 'bold' }}
-                                                    >
-                                                        ×
-                                                    </button>
+                                                    >×</button>
                                                 </span>
                                             ))}
                                         </div>
@@ -1064,60 +1202,6 @@ const AdminDashboard = () => {
             </footer>
         </div>
     );
-};
-
-// ===== LÓGICA DE BÚSQUEDA (en memoria, sobre los datos ya cargados) =====
-const buscarHabitaciones = (data, filtros) => {
-    let resultado = [...data];
-
-    // 1. Búsqueda simple por texto (número, tipo, amenidades)
-    if (filtros.q.trim()) {
-        const q = filtros.q.trim().toLowerCase();
-
-        resultado = resultado.filter(hab => {
-            const amenidadesTexto = Array.isArray(hab.amenidades)
-                ? hab.amenidades.join(', ').toLowerCase()
-                : (hab.amenidades || '').toLowerCase();
-
-            return (
-                String(hab.num_ha).includes(q) ||
-                (hab.tipo || '').toLowerCase().includes(q) ||
-                amenidadesTexto.includes(q)
-            );
-        });
-    }
-
-    // 2. Filtro por tipo
-    if (filtros.tipo) {
-        resultado = resultado.filter(hab => hab.tipo === filtros.tipo);
-    }
-
-    // 3. Filtro por estado
-    if (filtros.estado) {
-        resultado = resultado.filter(hab => hab.estado === filtros.estado);
-    }
-
-    // 4. Rango de precio
-    if (filtros.min !== '') {
-        resultado = resultado.filter(
-            hab => Number(hab.precio_noche) >= Number(filtros.min)
-        );
-    }
-
-    if (filtros.max !== '') {
-        resultado = resultado.filter(
-            hab => Number(hab.precio_noche) <= Number(filtros.max)
-        );
-    }
-
-    // 5. Filtro por piso
-    if (filtros.piso !== '') {
-        resultado = resultado.filter(
-            hab => Number(hab.piso) === Number(filtros.piso)
-        );
-    }
-
-    return resultado;
 };
 
 export default AdminDashboard;

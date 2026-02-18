@@ -50,11 +50,8 @@ rutas.get("/habitaciones", async (req, res) => {
 
 rutas.get("/", async (req, res) => {
     try {
-        const habitaciones =
-            await obtenerHabitacionesFiltradas(req.query);
-
-        res.json(habitaciones);
-
+        const resultado = await obtenerHabitacionesFiltradas(req.query);
+        res.json(resultado);
     } catch (error) {
         console.error(error);
         res.status(500).json({ mensaje: "Error servidor" });

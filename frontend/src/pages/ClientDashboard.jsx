@@ -9,6 +9,12 @@ const ClientDashboard = () => {
     const [error, setError] = useState(null);
     const [currentImages, setCurrentImages] = useState({});
 
+    // Paginación
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [totalPaginas, setTotalPaginas] = useState(1);
+    const [totalHabitaciones, setTotalHabitaciones] = useState(0);
+    const LIMIT = 10;
+
     // Imágenes por tipo de habitación
     const roomImages = {
         'Individual': [
@@ -39,19 +45,29 @@ const ClientDashboard = () => {
         cargarHabitaciones();
     }, []);
 
-    const cargarHabitaciones = async () => {
+    const cargarHabitaciones = async (pagina = 1) => {
         try {
             setLoading(true);
-            const response = await axios.get('http://localhost:3000/habitaciones');
-            setHabitaciones(response.data);
-            
+            const response = await axios.get('http://localhost:3000/habitaciones', {
+                params: { page: pagina, limit: LIMIT }
+            });
+
+            const { datos, total, pagina: pag, totalPaginas: tp } = response.data;
+
+            setHabitaciones(datos);
+            setPaginaActual(pag);
+            setTotalPaginas(tp);
+            setTotalHabitaciones(total);
+
             // Inicializar índice de imagen para cada habitación
             const initialImages = {};
-            response.data.forEach(hab => {
-                initialImages[hab.id] = 0;
-            });
+            datos.forEach(hab => { initialImages[hab.id] = 0; });
             setCurrentImages(initialImages);
             setError(null);
+
+            // Log de habitaciones cargadas desde la API
+            console.log('%c📦 Habitaciones cargadas desde la API:', 'color: #22c55e; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(response.data, null, 2));
         } catch (error) {
             console.error('Error cargando habitaciones:', error);
             setError('No se pudieron cargar las habitaciones');
@@ -60,19 +76,25 @@ const ClientDashboard = () => {
         }
     };
 
-    const obtenerHabitaciones = async () => {
-    const res = await axios.get("/api/habitaciones", {
-        params: {
-            q: busqueda,
-            tipo,
-            min,
-            max,
-            sort
-        }
-    });
+    const cambiarPagina = (nuevaPagina) => {
+        if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+        cargarHabitaciones(nuevaPagina);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-    setHabitaciones(res.data);
-};
+    const obtenerHabitaciones = async () => {
+        const res = await axios.get("/api/habitaciones", {
+            params: {
+                q: busqueda,
+                tipo,
+                min,
+                max,
+                sort
+            }
+        });
+
+        setHabitaciones(res.data);
+    };
 
 
     // Funciones del carrusel
@@ -104,26 +126,22 @@ const ClientDashboard = () => {
         window.location.href = '/login';
     };
 
-    // ===== BÚSQUEDA AVANZADA PARA CLIENTE =====
     const FILTROS_VACIOS = { q: '', tipo: '', min: '', max: '', sort: 'precio_asc' };
     const [filtros, setFiltros] = useState(FILTROS_VACIOS);
     const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_VACIOS);
     const [panelAbierto, setPanelAbierto] = useState(false);
 
-    // Solo habitaciones disponibles
     const habitacionesDisponibles = habitaciones.filter(h => h.estado === 'Disponible');
 
-    // Aplicar búsqueda sobre las disponibles
     const buscarHabitaciones = (data, f) => {
         let resultado = [...data];
 
-        // Búsqueda por texto
         if (f.q.trim()) {
             const q = f.q.trim().toLowerCase();
             resultado = resultado.filter(hab =>
-                String(hab.num_ha).includes(q) ||
-                (hab.tipo || '').toLowerCase().includes(q) ||
-                (hab.amenidades || '').toLowerCase().includes(q)
+                String(hab.num_ha ?? '').includes(q) ||
+                String(hab.tipo ?? '').toLowerCase().includes(q) ||
+                String(hab.amenidades ?? '').toLowerCase().includes(q)
             );
         }
 
@@ -144,8 +162,8 @@ const ClientDashboard = () => {
         resultado.sort((a, b) => {
             switch (f.sort) {
                 case 'precio_desc': return Number(b.precio_noche) - Number(a.precio_noche);
-                case 'tipo':        return (a.tipo || '').localeCompare(b.tipo || '');
-                default:            return Number(a.precio_noche) - Number(b.precio_noche); // precio_asc
+                case 'tipo': return (a.tipo || '').localeCompare(b.tipo || '');
+                default: return Number(a.precio_noche) - Number(b.precio_noche); // precio_asc
             }
         });
 
@@ -160,6 +178,9 @@ const ClientDashboard = () => {
 
     const aplicarBusqueda = () => {
         setFiltrosAplicados({ ...filtros });
+        const resultadosBusqueda = buscarHabitaciones(habitacionesDisponibles, filtros);
+        console.log('%c🔍 Resultados de búsqueda:', 'color: #4f8ef7; font-weight: bold; font-size: 13px;');
+        console.log(JSON.stringify(resultadosBusqueda, null, 2));
     };
 
     const limpiarFiltros = () => {
@@ -431,15 +452,15 @@ const ClientDashboard = () => {
                                             <article key={hab.id} className="room-card">
                                                 {/* Carrusel de imágenes */}
                                                 <div className="room-carousel">
-                                                    <img 
-                                                        src={images[currentIndex]} 
+                                                    <img
+                                                        src={images[currentIndex]}
                                                         alt={`${hab.tipo} - Imagen ${currentIndex + 1}`}
                                                         className="room-carousel-image"
                                                     />
-                                                    
+
                                                     {/* Botones de navegación */}
-                                                    <button 
-                                                        className="carousel-btn carousel-btn-prev" 
+                                                    <button
+                                                        className="carousel-btn carousel-btn-prev"
                                                         onClick={() => prevImage(hab.id, hab.tipo)}
                                                         aria-label="Imagen anterior"
                                                     >
@@ -447,8 +468,8 @@ const ClientDashboard = () => {
                                                             <polyline points="15 18 9 12 15 6"></polyline>
                                                         </svg>
                                                     </button>
-                                                    <button 
-                                                        className="carousel-btn carousel-btn-next" 
+                                                    <button
+                                                        className="carousel-btn carousel-btn-next"
                                                         onClick={() => nextImage(hab.id, hab.tipo)}
                                                         aria-label="Siguiente imagen"
                                                     >
@@ -507,6 +528,32 @@ const ClientDashboard = () => {
                             )}
                         </>
                     )}
+
+                    {/* ── PAGINACIÓN ── */}
+                    {totalPaginas > 1 && (
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginTop: '2rem', paddingBottom: '1rem' }}>
+                            <button
+                                className="btn-outline"
+                                onClick={() => cambiarPagina(paginaActual - 1)}
+                                disabled={paginaActual <= 1}
+                                style={{ opacity: paginaActual <= 1 ? 0.4 : 1 }}
+                            >
+                                ← Anterior
+                            </button>
+                            <span style={{ color: '#64748b', fontSize: '0.9rem' }}>
+                                Página <strong>{paginaActual}</strong> de <strong>{totalPaginas}</strong>
+                                &nbsp;·&nbsp; {totalHabitaciones} habitaciones en total
+                            </span>
+                            <button
+                                className="btn-outline"
+                                onClick={() => cambiarPagina(paginaActual + 1)}
+                                disabled={paginaActual >= totalPaginas}
+                                style={{ opacity: paginaActual >= totalPaginas ? 0.4 : 1 }}
+                            >
+                                Siguiente →
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -537,7 +584,7 @@ const ClientDashboard = () => {
                 </div>
             </footer>
 
-            
+
         </div>
     );
 };

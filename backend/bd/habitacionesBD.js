@@ -3,9 +3,9 @@ const { habitacionesBD } = require("./conexion");
 
 function validarDatos(habitacion) {
     return habitacion.num !== undefined &&
-           habitacion.tipo !== undefined &&
-           habitacion.precio_noche !== undefined &&
-           habitacion.estado !== undefined;
+        habitacion.tipo !== undefined &&
+        habitacion.precio_noche !== undefined &&
+        habitacion.estado !== undefined;
 }
 
 async function nuevaHabitacion(datos) {
@@ -13,7 +13,7 @@ async function nuevaHabitacion(datos) {
         const datosParaModelo = {
             ...datos,
             num: datos.num_ha, // Mapeo crítico
-            estado: datos.estado || "Libre" 
+            estado: datos.estado || "Libre"
         };
 
         const instanciaHabitacion = new Habitacion(datosParaModelo);
@@ -59,7 +59,7 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             resultado = resultado.filter(h =>
                 String(h.num_ha).includes(q) ||
                 (h.tipo || "").toLowerCase().includes(q) ||
-                (h.amenidades || "").toLowerCase().includes(q)
+                String(h.amenidades ?? "").toLowerCase().includes(q)
             );
         }
 
@@ -94,11 +94,19 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             }
         });
 
-        return resultado;
+        // ── PAGINACIÓN ──
+        const total = resultado.length;
+        const limit = Math.max(1, parseInt(filtros.limit) || 10);
+        const page = Math.max(1, parseInt(filtros.page) || 1);
+        const totalPaginas = Math.ceil(total / limit);
+        const inicio = (page - 1) * limit;
+        const datos = resultado.slice(inicio, inicio + limit);
+
+        return { datos, total, pagina: page, totalPaginas, limit };
 
     } catch (error) {
         console.error(error);
-        return [];
+        return { datos: [], total: 0, pagina: 1, totalPaginas: 0, limit: 10 };
     }
 }
 
@@ -116,14 +124,14 @@ async function modificarHabitacion(id, datos) { // Usamos id de documento
     try {
         const docRef = habitacionesBD.doc(id);
         const res = await docRef.get();
-        
+
         if (!res.exists) {
             return { exito: false, mensaje: "Habitación no encontrada" };
         }
 
         // Combinamos datos actuales con los nuevos
         const datosActualizados = { ...res.data(), ...datos };
-        
+
         // Pasamos por la clase para validar tipos (int, array, etc.)
         const instanciaHabitacion = new Habitacion(datosActualizados);
         const datosValidados = instanciaHabitacion.obtenerDatos;
