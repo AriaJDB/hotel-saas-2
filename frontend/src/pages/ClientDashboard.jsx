@@ -95,8 +95,6 @@ const ClientDashboard = () => {
     };
 
 
-
-
     // Funciones del carrusel
     const nextImage = (habId, tipo) => {
         const images = roomImages[tipo] || roomImages['Individual'];
@@ -173,12 +171,12 @@ const ClientDashboard = () => {
             {/* Header */}
             <Header usuario={usuario} cerrarSesion={cerrarSesion} />
 
-            {/* Hero Section */}
+            {/* Hero Section, esto es la imagen de Bienvenido a hotel flow y lo movi a src>components>layout>hero */}
             <Hero />
-            {/* Features Section */}
+            {/* Features Section, estas son las cajitas que dicen multiples ubicaciones, confirmacion inmediata y asi, las movi a  src>components>layout>features*/}
             <Features />
 
-            {/* Rooms Section con Búsqueda */}
+            {/* Rooms Section con Búsqueda esta es toda la parte de encuentra tu habitacion ideal, el filtro y las imagenes de las habitaciones, lo movi a src>components>rooms>RoomsSection, y las imagenes estan en RoomCard, roomsSection llama a RoomCard y asi*/}
             <RoomsSection
                 habitaciones={habitaciones}
                 loading={loading}
@@ -207,7 +205,7 @@ const ClientDashboard = () => {
             />
 
 
-            {/* Footer */}
+            {/* Footer, esto es lo de hasta abajito de los horarios contacto y eso, lo movi a src>components>layout>footer*/}
             <Footer />
 
         </div>

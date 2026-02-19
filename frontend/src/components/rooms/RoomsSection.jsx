@@ -1,5 +1,5 @@
 import React from "react";
-import RoomCard from "../RoomCard";
+import RoomCard from "./RoomCard";
 
 const RoomsSection = ({
     habitaciones,
