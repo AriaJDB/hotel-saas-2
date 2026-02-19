@@ -22,8 +22,7 @@ class Habitacion {
     }
 
     set tipo(tipo) {
-        // Sincronizado con tu imagen: individual, doble, triple
-        const tiposValidos = ["Individual", "Doble", "Triple", "Suite", "Deluxe"];
+        const tiposValidos = ["Individual", "Doble", "Suite", "Suite Ejecutiva"];
         if (tiposValidos.includes(tipo)) this._tipo = tipo;
     }
 

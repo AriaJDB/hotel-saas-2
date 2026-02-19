@@ -24,7 +24,7 @@ const cargarHabitaciones = async (filtrosActivos = {}) => {
         });
         
         // Filtramos disponibilidad localmente o en el backend
-        const disponibles = response.data.filter(h => h.estado === 'Disponible' || h.estado === 'Libre');
+        const disponibles = response.data.filter(h => h.estado === 'Disponible' || h.estado === 'Disponible');
         setHabitaciones(disponibles);
         
         // Reiniciar carruseles para los nuevos resultados

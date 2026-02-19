@@ -217,7 +217,7 @@ const AdminDashboard = () => {
                 tipo: 'Individual',
                 precio_noche: '',
                 amenidades: [],
-                estado: 'Libre',
+                estado: 'Disponible',
                 ultima_lim: '',
                 id_em: ''
             });

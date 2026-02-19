@@ -13,7 +13,7 @@ async function nuevaHabitacion(datos) {
         const datosParaModelo = {
             ...datos,
             num: datos.num_ha, // Mapeo crítico
-            estado: datos.estado || "Libre"
+            estado: datos.estado || "Disponible"
         };
 
         const instanciaHabitacion = new Habitacion(datosParaModelo);
