@@ -8,6 +8,10 @@ const ClientDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentImages, setCurrentImages] = useState({});
+    // NUEVOS ESTADOS PARA ANIMACIÓN DE BÚSQUEDA
+    const [buscando, setBuscando] = useState(false);
+    const [errorBusqueda, setErrorBusqueda] = useState(null);
+
 
     // Paginación
     const [paginaActual, setPaginaActual] = useState(1);
@@ -176,12 +180,29 @@ const ClientDashboard = () => {
         ([k, v]) => v !== '' && v !== FILTROS_VACIOS[k]
     );
 
-    const aplicarBusqueda = () => {
-        setFiltrosAplicados({ ...filtros });
-        const resultadosBusqueda = buscarHabitaciones(habitacionesDisponibles, filtros);
-        console.log('%c🔍 Resultados de búsqueda:', 'color: #4f8ef7; font-weight: bold; font-size: 13px;');
-        console.log(JSON.stringify(resultadosBusqueda, null, 2));
+    const aplicarBusqueda = async () => {
+        try {
+            setBuscando(true);
+            setErrorBusqueda(null);
+
+            // pequeña pausa visual para que se vea el spinner
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            setFiltrosAplicados({ ...filtros });
+
+            const resultadosBusqueda = buscarHabitaciones(habitacionesDisponibles, filtros);
+
+            console.log('%c🔍 Resultados de búsqueda:', 'color: #4f8ef7; font-weight: bold; font-size: 13px;');
+            console.log(JSON.stringify(resultadosBusqueda, null, 2));
+
+        } catch (err) {
+            console.error(err);
+            setErrorBusqueda(err.message || 'Error al buscar habitaciones');
+        } finally {
+            setBuscando(false);
+        }
     };
+
 
     const limpiarFiltros = () => {
         setFiltros(FILTROS_VACIOS);
@@ -432,7 +453,52 @@ const ClientDashboard = () => {
                                 )}
                             </div>
 
-                            {resultados.length === 0 ? (
+                            {buscando && (
+                                <div
+                                    className="loading-container"
+                                    style={{
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        width: '100%'
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}
+                                    >
+                                        <div className="loading-spinner"></div>
+
+                                        <span
+                                            style={{
+                                                color: '#2563eb',
+                                                fontWeight: '600',
+                                                fontSize: '16px'
+                                            }}
+                                        >
+                                            Buscando...
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+
+
+
+                            {errorBusqueda && (
+                                <div className="error-message">
+                                    <p><strong>Error:</strong> {errorBusqueda}</p>
+                                </div>
+                            )}
+
+
+                            {!buscando && !errorBusqueda && resultados.length === 0 ? (
+
                                 <div className="empty-state">
                                     <h3>No se encontraron habitaciones</h3>
                                     <p>Intenta ajustar los filtros de búsqueda</p>
