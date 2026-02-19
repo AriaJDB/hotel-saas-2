@@ -206,8 +206,6 @@ async function cambiarEstadoHabitacion(num, estado) {
  */
 async function obtenerHabitacionesDisponibles(fechaEntrada, fechaSalida) {
     try {
-        // Por ahora retornamos todas las habitaciones con estado "Disponible"
-        // En una implementación más completa, verificaríamos las reservaciones
         const snapshot = await habitacionesBD.where("estado", "==", "Disponible").get();
         const habitaciones = [];
         snapshot.forEach(doc => {

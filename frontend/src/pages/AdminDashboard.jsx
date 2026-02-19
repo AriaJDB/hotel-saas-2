@@ -575,7 +575,7 @@ const AdminDashboard = () => {
                                             </div>
                                             <div className="detail-item">
                                                 <span className="detail-label">Número:</span>
-                                                <span className="detail-value">Hab. {hab.num_ha}</span>
+                                                <span className="detail-value">Hab. {hab.num}</span>
                                             </div>
                                             <div className="detail-item">
                                                 <span className="detail-label">Piso:</span>
