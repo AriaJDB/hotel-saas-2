@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Footer from '../components/layout/Footer';
 import '../styles/CleaningStyles.css';
 
 const CleaningDashboard = () => {
@@ -12,44 +13,14 @@ const CleaningDashboard = () => {
         cargarHabitaciones();
     }, []);
 
-    // Reemplaza tu actual cargarHabitaciones y aplicarBusqueda
-// Dentro de ClientDashboard.jsx
-
-const cargarHabitaciones = async (filtrosActivos = {}) => {
-    try {
-        setLoading(true);
-        // IMPORTANTE: Se pasan los filtros en la propiedad 'params'
-        const response = await axios.get('http://localhost:3000/habitaciones', { 
-            params: filtrosActivos 
-        });
-        
-        // Filtramos disponibilidad localmente o en el backend
-        const disponibles = response.data.filter(h => h.estado === 'Disponible' || h.estado === 'Disponible');
-        setHabitaciones(disponibles);
-        
-        // Reiniciar carruseles para los nuevos resultados
-        const initialImages = {};
-        disponibles.forEach(hab => { initialImages[hab.id] = 0; });
-        setCurrentImages(initialImages);
-        setError(null);
-    } catch (error) {
-        setError('Error al conectar con el servidor');
-    } finally {
-        setLoading(false);
-    }
-};
-
-// Esta es la función que debe ejecutar tu botón "Aplicar Filtros"
-const aplicarBusqueda = () => {
-    console.log("Enviando filtros:", filtros); // Para depuración
-    cargarHabitaciones(filtros);
-};
-
-const limpiarFiltros = () => {
-    const reset = { q: '', tipoSeleccionado: '', min: '', max: '', amenidades: [] };
-    setFiltros(reset);
-    cargarHabitaciones(reset);
-};
+    const cargarHabitaciones = async () => {
+        try {
+            const response = await axios.get('http://localhost:3000/habitaciones/todas');
+            setHabitaciones(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error al cargar habitaciones:', error);
+        }
+    };
 
     const cerrarSesion = () => {
         localStorage.removeItem('usuario');
@@ -156,7 +127,7 @@ const limpiarFiltros = () => {
                     {/* Habitaciones por Limpiar */}
                     <div className="cleaning-section">
                         <h3 className="cleaning-section-title">Habitaciones Pendientes de Limpieza</h3>
-                        
+
                         {habitacionesPorEstado.limpieza.length === 0 ? (
                             <div className="empty-state">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ width: '4rem', height: '4rem', opacity: 0.5, marginBottom: '1rem' }}>
@@ -178,7 +149,7 @@ const limpiarFiltros = () => {
                                             <p><strong>Amenidades:</strong> {hab.amenidades || 'Estándar'}</p>
                                         </div>
                                         <div className="cleaning-card-actions">
-                                            <button 
+                                            <button
                                                 className="btn-complete"
                                                 onClick={() => actualizarEstado(hab.id, 'Disponible')}
                                             >
@@ -194,7 +165,7 @@ const limpiarFiltros = () => {
                     {/* Todas las Habitaciones */}
                     <div className="cleaning-section">
                         <h3 className="cleaning-section-title">Todas las Habitaciones</h3>
-                        
+
                         <div className="table-container">
                             <table className="data-table">
                                 <thead>
@@ -213,18 +184,17 @@ const limpiarFiltros = () => {
                                             <td>Piso {hab.piso}</td>
                                             <td>{hab.tipo}</td>
                                             <td>
-                                                <span className={`badge ${
-                                                    hab.estado === 'Disponible' ? 'badge-success' :
+                                                <span className={`badge ${hab.estado === 'Disponible' ? 'badge-success' :
                                                     hab.estado === 'Limpieza' ? 'badge-warning' :
-                                                    hab.estado === 'Ocupada' ? 'badge-info' :
-                                                    'badge-danger'
-                                                }`}>
+                                                        hab.estado === 'Ocupada' ? 'badge-info' :
+                                                            'badge-danger'
+                                                    }`}>
                                                     {hab.estado}
                                                 </span>
                                             </td>
                                             <td>
                                                 {hab.estado === 'Limpieza' && (
-                                                    <button 
+                                                    <button
                                                         className="btn-action btn-action-complete"
                                                         onClick={() => actualizarEstado(hab.id, 'Disponible')}
                                                     >
@@ -232,7 +202,7 @@ const limpiarFiltros = () => {
                                                     </button>
                                                 )}
                                                 {hab.estado === 'Disponible' && (
-                                                    <button 
+                                                    <button
                                                         className="btn-action btn-action-clean"
                                                         onClick={() => actualizarEstado(hab.id, 'Limpieza')}
                                                     >
@@ -250,13 +220,7 @@ const limpiarFiltros = () => {
             </section>
 
             {/* Footer */}
-            <footer className="footer">
-                <div className="container">
-                    <div className="footer-bottom">
-                        <p>&copy; 2026 HotelFlow. Panel de Limpieza.</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

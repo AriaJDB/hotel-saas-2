@@ -6,7 +6,8 @@ const {
     cambiarEstadoHabitacion,
     obtenerHabitacionesDisponibles,
     eliminarHabitacionBD,
-    modificarHabitacion
+    modificarHabitacion,
+    obtenerTodasHabitaciones
 } = require("../bd/habitacionesBD");
 
 rutas.get("/", async (req, res) => {
@@ -23,6 +24,17 @@ rutas.get("/disponibles/buscar", async (req, res) => {
     const { fechaEntrada, fechaSalida } = req.query;
     const habitaciones = await obtenerHabitacionesDisponibles(fechaEntrada, fechaSalida);
     res.status(200).json(habitaciones);
+});
+
+// Todas las habitaciones sin filtro de estado (para panel de mucama)
+rutas.get("/todas", async (req, res) => {
+    try {
+        const habitaciones = await obtenerTodasHabitaciones();
+        res.json(habitaciones);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: "Error servidor" });
+    }
 });
 
 // Crear nueva habitación
@@ -42,6 +54,12 @@ rutas.delete("/eliminarHabitacionBD/:id", async (req, res) => {
 });
 
 rutas.put("/modificarHabitacion/:id", async (req, res) => {
+    const resultado = await modificarHabitacion(req.params.id, req.body);
+    res.status(resultado.exito ? 200 : 400).json(resultado);
+});
+
+// PUT /:id - actualización directa por ID (usado por CleaningDashboard)
+rutas.put("/:id", async (req, res) => {
     const resultado = await modificarHabitacion(req.params.id, req.body);
     res.status(resultado.exito ? 200 : 400).json(resultado);
 });

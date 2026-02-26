@@ -6,6 +6,7 @@ import Registro from './pages/Registro';
 import AdminDashboard from './pages/AdminDashboard';
 import ClientDashboard from './pages/ClientDashboard';
 import CleaningDashboard from './pages/CleaningDashboard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -14,9 +15,21 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard" element={<ClientDashboard />} />
-        <Route path="/cleaning" element={<CleaningDashboard />} />
+        <Route path="/admin" element={
+          <ProtectedRoute rolesPermitidos={['admin']} redireccion="/login">
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute rolesPermitidos={['usuario', 'empleado']} redireccion="/login">
+            <ClientDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/cleaning" element={
+          <ProtectedRoute rolesPermitidos={['mucama', 'empleado']} redireccion="/login">
+            <CleaningDashboard />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );

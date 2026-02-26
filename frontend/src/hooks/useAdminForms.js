@@ -116,6 +116,23 @@ export const useAdminForms = () => {
     setItemSeleccionado(null);
   };
 
+  const agregarAmenidad = () => {
+    if (nuevaAmenidad.trim()) {
+      setFormHabitacion(prev => ({
+        ...prev,
+        amenidades: [...(prev.amenidades || []), nuevaAmenidad.trim()]
+      }));
+      setNuevaAmenidad('');
+    }
+  };
+
+  const eliminarAmenidad = (index) => {
+    setFormHabitacion(prev => ({
+      ...prev,
+      amenidades: (prev.amenidades || []).filter((_, i) => i !== index)
+    }));
+  };
+
   return {
     modalAbierto,
     tipoModal,
@@ -132,6 +149,8 @@ export const useAdminForms = () => {
     nuevaAmenidad,
     setNuevaAmenidad,
     abrirModal,
-    cerrarModal
+    cerrarModal,
+    agregarAmenidad,
+    eliminarAmenidad
   };
 };

@@ -3,10 +3,10 @@ import axios from 'axios';
 const API_URL = 'http://localhost:3000/usuarios';
 
 // --- USUARIOS ---
-export const registrarUsuario = (datos) => 
+export const registrarUsuario = (datos) =>
     axios.post(`${API_URL}/nuevo`, datos);
 
-export const loginUsuario = (credenciales) => 
+export const loginUsuario = (credenciales) =>
     axios.post(`${API_URL}/login`, credenciales);
 
 export const obtenerUsuarios = async () => {
@@ -15,7 +15,7 @@ export const obtenerUsuarios = async () => {
 };
 
 export const crearUsuario = async (datos) => {
-    const { data } = await axios.post(API_URL, datos);
+    const { data } = await axios.post(`${API_URL}/nuevo`, datos);
     return data;
 };
 

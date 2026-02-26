@@ -3,6 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Login.css';
 
+// Función reutilizable: determina la ruta según el tipo de usuario
+export const obtenerRutaPorTipo = (tipo) => {
+    switch (tipo) {
+        case 'admin': return '/admin';
+        case 'mucama':
+        case 'empleado': return '/cleaning';  // "empleado" es alias de mucama
+        default: return '/dashboard';
+    }
+};
+
 const Login = () => {
     const [correo, setCorreo] = useState('');
     const [contrasena, setContrasena] = useState('');
@@ -19,15 +29,7 @@ const Login = () => {
             if (respuesta.data && typeof respuesta.data === 'object') {
                 alert(`¡Bienvenido ${respuesta.data.nombre}!`);
                 localStorage.setItem('usuario', JSON.stringify(respuesta.data));
-
-                // Redirección según tipo de usuario
-                if (respuesta.data.tipo === 'admin') {
-                    navigate('/admin');
-                } else if (respuesta.data.tipo === 'mucama') {
-                    navigate('/cleaning');
-                } else {
-                    navigate('/dashboard');
-                }
+                navigate(obtenerRutaPorTipo(respuesta.data.tipo));
             } else {
                 alert("Credenciales incorrectas. Verifica tu correo y contraseña.");
             }

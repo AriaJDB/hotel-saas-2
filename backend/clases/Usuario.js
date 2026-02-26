@@ -31,7 +31,7 @@ class Usuario {
     set salt(salt) { this._salt = salt; }
 
     set tipo(tipo) {
-        const tiposValidos = ["usuario", "admin", "empleado"];
+        const tiposValidos = ["usuario", "admin", "mucama", "empleado"];
         if (tiposValidos.includes(tipo)) this._tipo = tipo;
     }
 

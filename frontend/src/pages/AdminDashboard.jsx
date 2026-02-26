@@ -38,24 +38,24 @@ const Buscador = ({ valor, onChange, placeholder }) => (
 const AdminDashboard = () => {
 
     const {
-    habitaciones,
-    reservaciones,
-    usuarios,
-    articulos,
-    cargarDatos,
-    crearHabitacion,
-    actualizarHabitacion,
-    eliminarHabitacion,
-    crearReservacion,
-    actualizarReservacion,
-    eliminarReservacion,
-    crearUsuario,
-    actualizarUsuario,
-    eliminarUsuario,
-    crearArticulo,
-    actualizarArticulo,
-    eliminarArticulo
-} = useAdminData();
+        habitaciones,
+        reservaciones,
+        usuarios,
+        articulos,
+        cargarDatos,
+        crearHabitacion,
+        actualizarHabitacion,
+        eliminarHabitacion,
+        crearReservacion,
+        actualizarReservacion,
+        eliminarReservacion,
+        crearUsuario,
+        actualizarUsuario,
+        eliminarUsuario,
+        crearArticulo,
+        actualizarArticulo,
+        eliminarArticulo
+    } = useAdminData();
 
     const [usuario, setUsuario] = useState(null);
 
@@ -127,21 +127,28 @@ const AdminDashboard = () => {
         }
     };
 
-   
+
 
     const guardarUsuario = async () => {
         try {
             if (modoModal === 'crear') {
-                await crearUsuario(formUsuario);
+                console.log('[DEBUG] Creando usuario:', formUsuario);
+                const resultado = await crearUsuario(formUsuario);
+                console.log('[DEBUG] Resultado crear:', resultado);
             } else {
-                await actualizarUsuario(itemSeleccionado.id, formUsuario);
+                console.log('[DEBUG] Editando usuario ID:', itemSeleccionado?.id, 'Datos:', formUsuario);
+                const resultado = await actualizarUsuario(itemSeleccionado.id, formUsuario);
+                console.log('[DEBUG] Resultado editar:', resultado);
+                if (resultado && resultado.exito === false) {
+                    throw new Error(resultado.mensaje || 'Error al actualizar');
+                }
             }
             cargarDatos();
             cerrarModal();
             alert('Usuario guardado exitosamente');
         } catch (error) {
             console.error('Error guardando usuario:', error);
-            alert('Error al guardar usuario');
+            alert('Error al guardar usuario: ' + (error.response?.data?.mensaje || error.message || 'desconocido'));
         }
     };
 
@@ -365,7 +372,7 @@ const AdminDashboard = () => {
                         />
                     )}
 
-                    
+
 
                     {vistaActual === 'reservaciones' && (
                         <ReservacionesSection

@@ -6,7 +6,7 @@ const UsuarioForm = ({
     modoModal
 }) => {
     return (
-        <div className="form-grid">
+        <div className="form-grid" autoComplete="off">
 
             <div className="form-group">
                 <label>Nombre</label>
@@ -72,6 +72,7 @@ const UsuarioForm = ({
                 <label>Contraseña</label>
                 <input
                     type="password"
+                    autoComplete="new-password"
                     value={formUsuario.password}
                     onChange={(e) =>
                         setFormUsuario({
@@ -102,7 +103,7 @@ const UsuarioForm = ({
                 >
                     <option value="usuario">Usuario</option>
                     <option value="admin">Administrador</option>
-                    <option value="empleado">Empleado</option>
+                    <option value="mucama">Mucama / Limpieza</option>
                 </select>
             </div>
 

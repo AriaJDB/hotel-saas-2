@@ -184,6 +184,16 @@ async function cambiarEstadoHabitacion(num, estado) {
     }
 }
 
+async function obtenerTodasHabitaciones() {
+    try {
+        const snapshot = await habitacionesBD.get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+        console.error("Error obteniendo todas las habitaciones:", error);
+        return [];
+    }
+}
+
 async function obtenerHabitacionesDisponibles(fechaEntrada, fechaSalida) {
     try {
         const snapshot = await habitacionesBD.where("estado", "==", "Disponible").get();
@@ -203,6 +213,7 @@ module.exports = {
     modificarHabitacion,
     cambiarEstadoHabitacion,
     obtenerHabitacionesDisponibles,
+    obtenerTodasHabitaciones,
     eliminarHabitacionBD,
     obtenerHabitacionesFiltradas,
     obtenerHabitacionPorNum,
