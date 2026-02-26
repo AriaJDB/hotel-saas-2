@@ -2,13 +2,11 @@ const { reservacionesBD, habitacionesBD } = require("./conexion");
 
 const ESTADOS_VALIDOS = ["Confirmada", "Check-in", "Check-out", "Cancelada"];
 
-// --------------- Helpers ---------------
 
 function fechaHoy() {
-    return new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    return new Date().toISOString().split('T')[0];
 }
 
-// Cambia el estado de una habitación por su número
 async function actualizarEstadoHabitacion(num_hab, estado) {
     try {
         const snap = await habitacionesBD.where("num", "==", Number(num_hab)).get();
@@ -20,7 +18,6 @@ async function actualizarEstadoHabitacion(num_hab, estado) {
     }
 }
 
-// --------------- CRUD ---------------
 
 async function obtenerReservaciones() {
     try {
@@ -110,12 +107,26 @@ async function modificarReservacion(id, datos) {
         delete actualizado.id;
 
         await docRef.update(actualizado);
+
+        // Si el estado cambió → actualizar habitación automáticamente
+        if (datos.estado_reserva && datos.estado_reserva !== actual.estado_reserva) {
+            if (datos.estado_reserva === "Check-out") {
+                await actualizarEstadoHabitacion(actualizado.num_hab, "Limpieza");
+                console.log(`[Reservación] Hab ${actualizado.num_hab} → Limpieza`);
+            } else if (datos.estado_reserva === "Check-in") {
+                await actualizarEstadoHabitacion(actualizado.num_hab, "Ocupada");
+            } else if (datos.estado_reserva === "Cancelada") {
+                await actualizarEstadoHabitacion(actualizado.num_hab, "Disponible");
+            }
+        }
+
         return { exito: true, mensaje: "Reservación actualizada exitosamente" };
     } catch (error) {
         console.error("Error modificando reservación:", error);
         return { exito: false, mensaje: "Error al modificar reservación" };
     }
 }
+
 
 async function cancelarReservacion(id) {
     try {

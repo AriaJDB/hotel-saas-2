@@ -365,38 +365,41 @@ const AdminDashboard = () => {
             <section className="dashboard-section">
                 <div className="container">
                     {vistaActual === 'habitaciones' && (
-                        <HabitacionesSection
-                            habitaciones={habitacionesFiltradas}
-                            abrirModal={(modo, item) => abrirModal('habitacion', modo, item)}
-                            eliminarHabitacion={eliminarHabitacionHandler}
-                        />
+                        <>
+                            <div style={{ padding: '1rem 0' }}>
+                                <Buscador valor={busquedaHabitaciones} onChange={setBusquedaHabitaciones} placeholder="Buscar por número, tipo, estado..." />
+                            </div>
+                            <HabitacionesSection habitaciones={habitacionesFiltradas} abrirModal={(modo, item) => abrirModal('habitacion', modo, item)} eliminarHabitacion={eliminarHabitacionHandler} />
+                        </>
                     )}
 
-
-
                     {vistaActual === 'reservaciones' && (
-                        <ReservacionesSection
-                            reservaciones={reservacionesFiltradas}
-                            abrirModal={(modo, item) => abrirModal('reservacion', modo, item)}
-                            eliminarReservacion={eliminarReservacion}
-                        />
+                        <>
+                            <div style={{ padding: '1rem 0' }}>
+                                <Buscador valor={busquedaReservaciones} onChange={setBusquedaReservaciones} placeholder="Buscar por habitación, usuario, estado..." />
+                            </div>
+                            <ReservacionesSection reservaciones={reservacionesFiltradas} abrirModal={(modo, item) => abrirModal('reservacion', modo, item)} eliminarReservacion={eliminarReservacion} />
+                        </>
                     )}
 
                     {vistaActual === 'usuarios' && (
-                        <UsuariosSection
-                            usuarios={usuariosFiltrados}
-                            abrirModal={(modo, item) => abrirModal('usuario', modo, item)}
-                            eliminarUsuario={eliminarUsuario}
-                        />
+                        <>
+                            <div style={{ padding: '1rem 0' }}>
+                                <Buscador valor={busquedaUsuarios} onChange={setBusquedaUsuarios} placeholder="Buscar usuario por nombre, correo, tipo..." />
+                            </div>
+                            <UsuariosSection usuarios={usuariosFiltrados} abrirModal={(modo, item) => abrirModal('usuario', modo, item)} eliminarUsuario={eliminarUsuario} />
+                        </>
                     )}
 
                     {vistaActual === 'articulos' && (
-                        <ArticulosSection
-                            articulos={articulosFiltrados}
-                            abrirModal={(modo, item) => abrirModal('articulo', modo, item)}
-                            eliminarArticulo={eliminarArticulo}
-                        />
+                        <>
+                            <div style={{ padding: '1rem 0' }}>
+                                <Buscador valor={busquedaArticulos} onChange={setBusquedaArticulos} placeholder="Buscar artículo por nombre, categoría..." />
+                            </div>
+                            <ArticulosSection articulos={articulosFiltrados} abrirModal={(modo, item) => abrirModal('articulo', modo, item)} eliminarArticulo={eliminarArticulo} />
+                        </>
                     )}
+
                 </div>
             </section>
 
