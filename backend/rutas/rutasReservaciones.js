@@ -15,6 +15,13 @@ rutas.get("/", async (req, res) => {
     res.status(200).json(reservaciones);
 });
 
+// ⚠️ IMPORTANTE: esta ruta va ANTES de /:id para que no se confunda
+// Obtener reservaciones de un usuario específico
+rutas.get("/usuario/:idUsuario", async (req, res) => {
+    const reservaciones = await obtenerReservacionesPorUsuario(req.params.idUsuario);
+    res.status(200).json(reservaciones);
+});
+
 // Obtener reservación específica por ID
 rutas.get("/:id", async (req, res) => {
     const reservacion = await obtenerReservacionPorId(req.params.id);
@@ -23,12 +30,6 @@ rutas.get("/:id", async (req, res) => {
     } else {
         res.status(404).json({ mensaje: "Reservación no encontrada" });
     }
-});
-
-// Obtener reservaciones de un usuario específico
-rutas.get("/usuario/:idUsuario", async (req, res) => {
-    const reservaciones = await obtenerReservacionesPorUsuario(req.params.idUsuario);
-    res.status(200).json(reservaciones);
 });
 
 // Crear nueva reservación

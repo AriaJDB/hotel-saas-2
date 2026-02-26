@@ -25,7 +25,8 @@ const RoomsSection = ({
     setPanelAbierto,
     hayFiltrosActivos,
     handleKeyDown,
-    cargarHabitaciones
+    cargarHabitaciones,
+    onReservar
 }) => {
 
 
@@ -218,6 +219,7 @@ const RoomsSection = ({
                                         prevImage={prevImage}
                                         nextImage={nextImage}
                                         goToImage={goToImage}
+                                        onReservar={onReservar}
                                     />
                                 ))}
 

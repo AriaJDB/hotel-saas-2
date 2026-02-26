@@ -7,6 +7,7 @@ const habitacionesRutas = require("./rutas/rutasHabitaciones");
 const reservacionesRutas = require("./rutas/rutasReservaciones");
 const articulosRutas = require("./rutas/rutasArticulos");
 const pedidosRutas = require("./rutas/rutasPedidos");
+const autoCheckout = require("./jobs/autoCheckout");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
