@@ -19,7 +19,6 @@ async function nuevaHabitacion(datos) {
         const instanciaHabitacion = new Habitacion(datosParaModelo);
         const datosValidados = instanciaHabitacion.obtenerDatos;
 
-        // Verificamos qué se está intentando guardar
         if (!validarDatos(datosValidados)) {
             console.error("Fallo de validación en:", datosValidados);
             return { exito: false, mensaje: "Datos inválidos: revisa que el número y tipo sean correctos" };
@@ -37,8 +36,6 @@ async function nuevaHabitacion(datos) {
         return { exito: false, mensaje: "Error interno al guardar" };
     }
 }
-
-
 
 async function obtenerHabitacionPorNum(num) {
     try {
@@ -65,10 +62,8 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             ...doc.data()
         }));
 
-        // Solo disponibles
         resultado = resultado.filter(h => h.estado === "Disponible");
 
-        // 🔎 búsqueda texto
         if (filtros.q) {
             const q = filtros.q.toLowerCase().trim();
 
@@ -79,26 +74,21 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             );
         }
 
-        // Tipo habitación
         if (filtros.tipo) {
             resultado = resultado.filter(h => h.tipo === filtros.tipo);
         }
 
-        // Precio mínimo
         if (filtros.min) {
             resultado = resultado.filter(
                 h => Number(h.precio_noche) >= Number(filtros.min)
             );
         }
 
-        // Precio máximo
         if (filtros.max) {
             resultado = resultado.filter(
                 h => Number(h.precio_noche) <= Number(filtros.max)
             );
         }
-
-        // Ordenamiento
         resultado.sort((a, b) => {
             switch (filtros.sort) {
                 case "precio_desc":
@@ -110,7 +100,6 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             }
         });
 
-        // ── PAGINACIÓN ──
         const total = resultado.length;
         const limit = Math.max(1, parseInt(filtros.limit) || 10);
         const page = Math.max(1, parseInt(filtros.page) || 1);
@@ -164,9 +153,6 @@ async function modificarHabitacion(id, datos) { // Usamos id de documento
     }
 }
 
-/**
- * Eliminar habitación
- */
 async function eliminarHabitacionBD(id) {
     try {
         await habitacionesBD.doc(id).delete();
@@ -177,9 +163,6 @@ async function eliminarHabitacionBD(id) {
     }
 }
 
-/**
- * Cambiar estado de habitación
- */
 async function cambiarEstadoHabitacion(num, estado) {
     try {
         const estadosValidos = ["Disponible", "Ocupada", "Limpiando", "Mantenimiento"];
@@ -201,9 +184,6 @@ async function cambiarEstadoHabitacion(num, estado) {
     }
 }
 
-/**
- * Obtener habitaciones disponibles para un rango de fechas
- */
 async function obtenerHabitacionesDisponibles(fechaEntrada, fechaSalida) {
     try {
         const snapshot = await habitacionesBD.where("estado", "==", "Disponible").get();

@@ -6,14 +6,14 @@ import Hero from '../components/layout/Hero';
 import Features from '../components/layout/Features';
 import RoomsSection from "../components/rooms/RoomsSection";
 import Footer from "../components/layout/Footer";
+import { roomImages } from "../constants/roomImages";
+import { useRoomCarousel } from '../hooks/useRoomCarousel';
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);
     const [habitaciones, setHabitaciones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [currentImages, setCurrentImages] = useState({});
-    // NUEVOS ESTADOS PARA ANIMACIÓN DE BÚSQUEDA
     const [buscando, setBuscando] = useState(false);
     const [errorBusqueda, setErrorBusqueda] = useState(null);
 
@@ -24,29 +24,6 @@ const ClientDashboard = () => {
     const [totalHabitaciones, setTotalHabitaciones] = useState(0);
     const LIMIT = 10;
 
-    // Imágenes por tipo de habitación
-    const roomImages = {
-        'Individual': [
-            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
-            'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
-            'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
-        ],
-        'Doble': [
-            'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
-            'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-            'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800'
-        ],
-        'Suite': [
-            'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800',
-            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
-            'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800'
-        ],
-        'Suite Ejecutiva': [
-            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
-            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
-            'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800'
-        ]
-    };
 
     useEffect(() => {
         const usuarioData = localStorage.getItem('usuario');
@@ -61,7 +38,6 @@ const ClientDashboard = () => {
                 page: pagina,
                 limit: LIMIT
             });
-
 
             const { datos, total, pagina: pag, totalPaginas: tp } = response;
 
@@ -96,28 +72,13 @@ const ClientDashboard = () => {
 
 
     // Funciones del carrusel
-    const nextImage = (habId, tipo) => {
-        const images = roomImages[tipo] || roomImages['Individual'];
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: (prev[habId] + 1) % images.length
-        }));
-    };
-
-    const prevImage = (habId, tipo) => {
-        const images = roomImages[tipo] || roomImages['Individual'];
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: prev[habId] === 0 ? images.length - 1 : prev[habId] - 1
-        }));
-    };
-
-    const goToImage = (habId, index) => {
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: index
-        }));
-    };
+    const {
+        currentImages,
+        nextImage,
+        prevImage,
+        goToImage,
+        setCurrentImages
+    } = useRoomCarousel(roomImages);
 
     const cerrarSesion = () => {
         localStorage.removeItem('usuario');
