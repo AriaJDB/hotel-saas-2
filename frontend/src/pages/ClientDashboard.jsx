@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/ClientStyles.css';
+import '../styles/scroll-animations.css';
+import '../styles/carousel-transition.css';
+
 import { obtenerHabitaciones } from "../api/habitacionesService";
 import { crearReservacion, obtenerMisReservaciones, cancelarReservacion } from "../api/reservacionesService";
 import Header from "../components/layout/Header";
@@ -9,7 +12,9 @@ import RoomsSection from "../components/rooms/RoomsSection";
 import ReservaModal from "../components/rooms/ReservaModal";
 import Footer from "../components/layout/Footer";
 import { roomImages } from "../constants/roomImages";
-import { useRoomCarousel } from '../hooks/useRoomCarousel';
+
+import useRoomCarousel from '../hooks/useRoomCarousel';
+import useScrollAnimation from '../hooks/useScrollAnimation';
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);
@@ -32,6 +37,22 @@ const ClientDashboard = () => {
     // Mis reservaciones
     const [misReservaciones, setMisReservaciones] = useState([]);
     const [cargandoReservas, setCargandoReservas] = useState(false);
+
+    // Filtros
+    const FILTROS_VACIOS = { q: '', tipo: '', min: '', max: '', sort: 'precio_asc' };
+    const [filtros, setFiltros] = useState(FILTROS_VACIOS);
+    const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_VACIOS);
+    const [panelAbierto, setPanelAbierto] = useState(false);
+    const hayFiltrosActivos = filtros.q || filtros.tipo || filtros.min || filtros.max;
+
+    // Carrusel con fade
+    const { currentImages, fadingImages, nextImage, prevImage, goToImage, setCurrentImages }
+        = useRoomCarousel(roomImages);
+
+    // Scroll animations — threshold 0 para activarse en cuanto entra al viewport
+    const [refHero,     visibleHero]     = useScrollAnimation(0);
+    const [refRooms,    visibleRooms]    = useScrollAnimation(0);
+    const [refReservas, visibleReservas] = useScrollAnimation(0);
 
     useEffect(() => {
         const usuarioData = localStorage.getItem('usuario');
@@ -78,10 +99,7 @@ const ClientDashboard = () => {
     };
 
     const handleReservar = (hab) => {
-        if (!usuario) {
-            alert("Debes iniciar sesión para reservar.");
-            return;
-        }
+        if (!usuario) { alert("Debes iniciar sesión para reservar."); return; }
         setHabitacionSeleccionada(hab);
         setModalReservaAbierto(true);
     };
@@ -119,20 +137,6 @@ const ClientDashboard = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    const { currentImages, nextImage, prevImage, goToImage, setCurrentImages } = useRoomCarousel(roomImages);
-
-    const cerrarSesion = () => {
-        localStorage.removeItem('usuario');
-        window.location.href = '/login';
-    };
-
-    const FILTROS_VACIOS = { q: '', tipo: '', min: '', max: '', sort: 'precio_asc' };
-    const [filtros, setFiltros] = useState(FILTROS_VACIOS);
-    const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_VACIOS);
-    const [panelAbierto, setPanelAbierto] = useState(false);
-
-    const hayFiltrosActivos = filtros.q || filtros.tipo || filtros.min || filtros.max;
-
     const aplicarBusqueda = async () => {
         try {
             setBuscando(true);
@@ -156,49 +160,67 @@ const ClientDashboard = () => {
 
     const handleKeyDown = (e) => { if (e.key === 'Enter') aplicarBusqueda(); };
 
+    const cerrarSesion = () => {
+        localStorage.removeItem('usuario');
+        window.location.href = '/login';
+    };
+
     const estadoColor = {
         "Confirmada": { bg: "#dcfce7", color: "#16a34a" },
-        "Check-in": { bg: "#dbeafe", color: "#1d4ed8" },
-        "Check-out": { bg: "#f3f4f6", color: "#6b7280" },
-        "Cancelada": { bg: "#fee2e2", color: "#dc2626" }
+        "Check-in":   { bg: "#dbeafe", color: "#1d4ed8" },
+        "Check-out":  { bg: "#f3f4f6", color: "#6b7280" },
+        "Cancelada":  { bg: "#fee2e2", color: "#dc2626" }
     };
 
     return (
         <div>
             <Header usuario={usuario} cerrarSesion={cerrarSesion} />
-            <Hero />
+
+            {/* HERO — fade-in al entrar al viewport */}
+            <div ref={refHero} className={`fade-in-section ${visibleHero ? 'is-visible' : ''}`}>
+                <Hero />
+            </div>
+
             <Features />
 
-            <RoomsSection
-                habitaciones={habitaciones}
-                loading={loading}
-                error={error}
-                buscando={buscando}
-                errorBusqueda={errorBusqueda}
-                filtros={filtros}
-                setFiltros={setFiltros}
-                aplicarBusqueda={aplicarBusqueda}
-                limpiarFiltros={limpiarFiltros}
-                paginaActual={paginaActual}
-                totalPaginas={totalPaginas}
-                cambiarPagina={cambiarPagina}
-                roomImages={roomImages}
-                currentImages={currentImages}
-                prevImage={prevImage}
-                nextImage={nextImage}
-                goToImage={goToImage}
-                totalHabitaciones={totalHabitaciones}
-                panelAbierto={panelAbierto}
-                setPanelAbierto={setPanelAbierto}
-                hayFiltrosActivos={hayFiltrosActivos}
-                handleKeyDown={handleKeyDown}
-                cargarHabitaciones={cargarHabitaciones}
-                onReservar={handleReservar}
-            />
+            {/* ROOMS — fade-in al hacer scroll */}
+            <div ref={refRooms} className={`fade-in-section ${visibleRooms ? 'is-visible' : ''}`}>
+                <RoomsSection
+                    habitaciones={habitaciones}
+                    loading={loading}
+                    error={error}
+                    buscando={buscando}
+                    errorBusqueda={errorBusqueda}
+                    filtros={filtros}
+                    setFiltros={setFiltros}
+                    aplicarBusqueda={aplicarBusqueda}
+                    limpiarFiltros={limpiarFiltros}
+                    paginaActual={paginaActual}
+                    totalPaginas={totalPaginas}
+                    cambiarPagina={cambiarPagina}
+                    roomImages={roomImages}
+                    currentImages={currentImages}
+                    fadingImages={fadingImages}
+                    prevImage={prevImage}
+                    nextImage={nextImage}
+                    goToImage={goToImage}
+                    totalHabitaciones={totalHabitaciones}
+                    panelAbierto={panelAbierto}
+                    setPanelAbierto={setPanelAbierto}
+                    hayFiltrosActivos={hayFiltrosActivos}
+                    handleKeyDown={handleKeyDown}
+                    cargarHabitaciones={cargarHabitaciones}
+                    onReservar={handleReservar}
+                />
+            </div>
 
-            {/* ====== Mis Reservaciones ====== */}
+            {/* MIS RESERVACIONES — fade-in al hacer scroll */}
             {usuario && (
-                <section style={{ padding: "3rem 0", background: "#f8fafc" }}>
+                <section
+                    ref={refReservas}
+                    className={`fade-in-section ${visibleReservas ? 'is-visible' : ''}`}
+                    style={{ padding: "3rem 0", background: "#f8fafc" }}
+                >
                     <div className="container">
                         <h2 style={{ marginBottom: "1.5rem", fontSize: "1.6rem", color: "#1e293b" }}>
                             Mis Reservaciones
@@ -225,15 +247,11 @@ const ClientDashboard = () => {
                                         const estiloEstado = estadoColor[reserva.estado_reserva] || { bg: "#f3f4f6", color: "#6b7280" };
                                         return (
                                             <div key={reserva.id} style={{
-                                                background: "white",
-                                                borderRadius: 12,
+                                                background: "white", borderRadius: 12,
                                                 padding: "1.25rem 1.5rem",
                                                 boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                flexWrap: "wrap",
-                                                gap: "1rem"
+                                                display: "flex", justifyContent: "space-between",
+                                                alignItems: "center", flexWrap: "wrap", gap: "1rem"
                                             }}>
                                                 <div>
                                                     <strong style={{ fontSize: "1rem", color: "#1e293b" }}>
@@ -258,16 +276,13 @@ const ClientDashboard = () => {
                                                         <p style={{ margin: 0, fontSize: "0.8rem", color: "#94a3b8" }}>total</p>
                                                     </div>
                                                     <span style={{
-                                                        padding: "4px 12px",
-                                                        borderRadius: 20,
-                                                        fontSize: "0.82rem",
-                                                        fontWeight: 600,
-                                                        background: estiloEstado.bg,
-                                                        color: estiloEstado.color
+                                                        padding: "4px 12px", borderRadius: 20,
+                                                        fontSize: "0.82rem", fontWeight: 600,
+                                                        background: estiloEstado.bg, color: estiloEstado.color
                                                     }}>
                                                         {reserva.estado_reserva}
                                                     </span>
-                                                    {(reserva.estado_reserva === "Confirmada") && (
+                                                    {reserva.estado_reserva === "Confirmada" && (
                                                         <button
                                                             className="btn-secondary"
                                                             style={{ padding: "6px 14px", fontSize: "0.85rem" }}
@@ -302,3 +317,4 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
+ 

@@ -1,0 +1,24 @@
+/* =====================================================
+   carousel-transition.css  —  AGREGAR al final de ClientStyles.css
+   O importar directamente: import '../styles/carousel-transition.css';
+   ===================================================== */
+
+/* ── Transición fade entre imágenes del carrusel ── */
+.room-carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Transición de escala en hover (ya existía) + opacidad para el fade entre imágenes */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 1;
+}
+
+/* Clase que agrega el hook durante el cambio de imagen */
+.room-carousel-image.fading {
+    opacity: 0;
+}
+
+/* El zoom en hover sigue funcionando igual */
+.room-carousel:hover .room-carousel-image:not(.fading) {
+    transform: scale(1.05);
+}

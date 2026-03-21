@@ -2,35 +2,44 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/ClientStyles.css';
+import '../styles/carousel-transition.css';
+import '../styles/scroll-animations.css';
+
+import useRoomCarousel from '../hooks/useRoomCarousel';
+import useScrollAnimation from '../hooks/useScrollAnimation';
+
+// Fuera del componente para no recrearse en cada render
+const roomImages = {
+    'Individual': [
+        'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
+        'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
+        'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
+    ],
+    'Doble': [
+        'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
+        'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
+        'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800'
+    ],
+    'Suite': [
+        'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800',
+        'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
+        'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800'
+    ],
+    'Suite Ejecutiva': [
+        'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
+        'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
+        'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800'
+    ]
+};
 
 const Home = () => {
     const [habitaciones, setHabitaciones] = useState([]);
-    // Estado para controlar la imagen actual de cada habitación
-    const [currentImages, setCurrentImages] = useState({});
 
-    // Imágenes por tipo de habitación
-    const roomImages = {
-        'Individual': [
-            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
-            'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800',
-            'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
-        ],
-        'Doble': [
-            'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800',
-            'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-            'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800'
-        ],
-        'Suite': [
-            'https://images.unsplash.com/photo-1591088398332-8a7791972843?w=800',
-            'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
-            'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=800'
-        ],
-        'Suite Ejecutiva': [
-            'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
-            'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800',
-            'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800'
-        ]
-    };
+    const { currentImages, fadingImages, nextImage, prevImage, goToImage, setCurrentImages }
+        = useRoomCarousel(roomImages);
+
+    const [refRooms, visibleRooms] = useScrollAnimation(0);
+    const [refServices, visibleServices] = useScrollAnimation(0);
 
     useEffect(() => {
         cargarHabitaciones();
@@ -39,52 +48,20 @@ const Home = () => {
     const cargarHabitaciones = async () => {
         try {
             const response = await axios.get('http://localhost:3000/habitaciones');
-            // El backend retorna { datos: [...], total, pagina, ... } o un array directo
             let lista = [];
             if (Array.isArray(response.data)) {
                 lista = response.data;
             } else if (response.data && Array.isArray(response.data.datos)) {
                 lista = response.data.datos;
             }
-
             setHabitaciones(lista);
-
-            // Inicializar el índice de imagen para cada habitación
             const initialImages = {};
-            lista.forEach(hab => {
-                initialImages[hab.id] = 0;
-            });
+            lista.forEach(hab => { initialImages[hab.id] = 0; });
             setCurrentImages(initialImages);
         } catch (error) {
             console.error('Error cargando habitaciones:', error);
             setHabitaciones([]);
         }
-    };
-
-    // Función para cambiar a la siguiente imagen
-    const nextImage = (habId, tipo) => {
-        const images = roomImages[tipo] || roomImages['Individual'];
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: (prev[habId] + 1) % images.length
-        }));
-    };
-
-    // Función para cambiar a la imagen anterior
-    const prevImage = (habId, tipo) => {
-        const images = roomImages[tipo] || roomImages['Individual'];
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: prev[habId] === 0 ? images.length - 1 : prev[habId] - 1
-        }));
-    };
-
-    // Función para ir a una imagen específica
-    const goToImage = (habId, index) => {
-        setCurrentImages(prev => ({
-            ...prev,
-            [habId]: index
-        }));
     };
 
     return (
@@ -124,8 +101,6 @@ const Home = () => {
                     <div className="hero-content">
                         <h2 className="hero-title">Bienvenido a HotelFlow</h2>
                         <p className="hero-subtitle">Experiencia de hospedaje premium para viajeros de negocios y placer</p>
-
-                        {/* Booking Form */}
                         <div className="booking-card">
                             <h3 className="booking-title">Reserve su Habitación</h3>
                             <form className="booking-form">
@@ -218,30 +193,31 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Rooms Section - CON CARRUSEL INLINE */}
-            <section id="habitaciones" className="rooms">
+            {/* Rooms Section — scroll animation + carrusel con fade */}
+            <section id="habitaciones" className="rooms" ref={refRooms}>
                 <div className="container">
-                    <div className="section-header">
+                    <div className={`section-header fade-in-section ${visibleRooms ? 'is-visible' : ''}`}>
                         <h2 className="section-title">Nuestras Habitaciones</h2>
                         <p className="section-subtitle">Espacios diseñados para su comodidad y productividad</p>
                     </div>
 
                     <div className="rooms-grid">
-                        {habitaciones.slice(0, 3).map(hab => {
+                        {habitaciones.slice(0, 3).map((hab, i) => {
                             const images = roomImages[hab.tipo] || roomImages['Individual'];
-                            const currentIndex = currentImages[hab.id] || 0;
+                            const currentIndex = currentImages[hab.id] ?? 0;
 
                             return (
-                                <article key={hab.id} className="room-card">
-                                    {/* Carrusel de imágenes */}
+                                <article
+                                    key={hab.id}
+                                    className={`room-card fade-in-section ${visibleRooms ? 'is-visible' : ''}`}
+                                    style={{ transitionDelay: `${i * 0.15}s` }}
+                                >
                                     <div className="room-carousel">
                                         <img
                                             src={images[currentIndex]}
                                             alt={`${hab.tipo} - Imagen ${currentIndex + 1}`}
-                                            className="room-carousel-image"
+                                            className={`room-carousel-image ${fadingImages[hab.id] ? 'fading' : ''}`}
                                         />
-
-                                        {/* Botones de navegación */}
                                         <button
                                             className="carousel-btn carousel-btn-prev"
                                             onClick={() => prevImage(hab.id, hab.tipo)}
@@ -260,8 +236,6 @@ const Home = () => {
                                                 <polyline points="9 18 15 12 9 6"></polyline>
                                             </svg>
                                         </button>
-
-                                        {/* Indicadores de puntos */}
                                         <div className="carousel-dots">
                                             {images.map((_, index) => (
                                                 <button
@@ -272,8 +246,6 @@ const Home = () => {
                                                 />
                                             ))}
                                         </div>
-
-                                        {/* Badges */}
                                         <div className="room-badge">{hab.estado}</div>
                                         <div className="room-price">
                                             <span className="price-amount">${hab.precio_noche}</span>
@@ -313,16 +285,15 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Services Section */}
-            <section id="servicios" className="services">
+            {/* Services Section — scroll animation */}
+            <section id="servicios" className="services" ref={refServices}>
                 <div className="container">
-                    <div className="section-header">
+                    <div className={`section-header fade-in-section ${visibleServices ? 'is-visible' : ''}`}>
                         <h2 className="section-title">Servicios Adicionales</h2>
                         <p className="section-subtitle">Complemente su estadía con nuestros servicios premium</p>
                     </div>
-
                     <div className="services-grid">
-                        <div className="service-item">
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -332,7 +303,7 @@ const Home = () => {
                             <p>Buffet completo de 6:00 AM a 10:00 AM</p>
                             <span className="service-price">+ $15/día</span>
                         </div>
-                        <div className="service-item">
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.15s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -343,7 +314,7 @@ const Home = () => {
                             <p>Salida hasta las 4:00 PM</p>
                             <span className="service-price">+ $25</span>
                         </div>
-                        <div className="service-item">
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.3s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
