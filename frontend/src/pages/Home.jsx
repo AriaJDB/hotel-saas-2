@@ -1,24 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/ClientStyles.css';
-import roomImages from "../constants/roomImages";
-import useRoomCarousel from '../hooks/useRoomCarousel';
-import Footer from '../components/layout/Footer';
-import Header from '../components/layout/HeaderHome';
-
-const Home = () => {
-    const [habitaciones, setHabitaciones] = useState([]);
-    const { currentImages, nextImage, prevImage, goToImage, setCurrentImages } = useRoomCarousel(roomImages);
-
-    const intervalsRef = useRef({});
 import '../styles/carousel-transition.css';
 import '../styles/scroll-animations.css';
 
 import useRoomCarousel from '../hooks/useRoomCarousel';
 import useScrollAnimation from '../hooks/useScrollAnimation';
 
-// Fuera del componente para no recrearse en cada render
 const roomImages = {
     'Individual': [
         'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800',
@@ -48,61 +37,17 @@ const Home = () => {
     const { currentImages, fadingImages, nextImage, prevImage, goToImage, setCurrentImages }
         = useRoomCarousel(roomImages);
 
-    const [refRooms, visibleRooms] = useScrollAnimation(0);
+    // Solo animamos secciones que están DEBAJO del fold (services, cta)
+    const [refRooms,    visibleRooms]    = useScrollAnimation(0);
     const [refServices, visibleServices] = useScrollAnimation(0);
 
     useEffect(() => {
         cargarHabitaciones();
-        return () => {
-            Object.values(intervalsRef.current).forEach(clearInterval);
-        };
     }, []);
-
-    const [flippedServices, setFlippedServices] = useState({});
-
-    const toggleServiceFlip = (index) => {
-        setFlippedServices(prev => ({
-            ...prev,
-            [index]: !prev[index]
-        }));
-    };
-
-    // Lógica de Autoplay al entrar el mouse
-    const handleMouseEnter = (habId, habTipo) => {
-        if (intervalsRef.current[habId]) return;
-        intervalsRef.current[habId] = setInterval(() => {
-            nextImage(habId, habTipo);
-        }, 1000);
-    };
-
-    const handleMouseLeave = (habId) => {
-        if (intervalsRef.current[habId]) {
-            clearInterval(intervalsRef.current[habId]);
-            delete intervalsRef.current[habId];
-        }
-    };
-
-    // Efecto de Scroll
-    useEffect(() => {
-        const observerOptions = { threshold: 0.1 };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                }
-            });
-        }, observerOptions);
-
-        const elements = document.querySelectorAll('.reveal');
-        elements.forEach((el) => observer.observe(el));
-
-        return () => observer.disconnect();
-    }, [habitaciones]);
 
     const cargarHabitaciones = async () => {
         try {
             const response = await axios.get('http://localhost:3000/habitaciones');
-            let lista = Array.isArray(response.data) ? response.data : (response.data?.datos || []);
             let lista = [];
             if (Array.isArray(response.data)) {
                 lista = response.data;
@@ -110,9 +55,7 @@ const Home = () => {
                 lista = response.data.datos;
             }
             setHabitaciones(lista);
-
             const initialImages = {};
-            lista.forEach(hab => { initialImages[hab.id] = 0; });
             lista.forEach(hab => { initialImages[hab.id] = 0; });
             setCurrentImages(initialImages);
         } catch (error) {
@@ -123,9 +66,35 @@ const Home = () => {
 
     return (
         <div>
-            <Header />
+            {/* Header */}
+            <header className="header">
+                <div className="container">
+                    <div className="header-content">
+                        <div className="logo-section">
+                            <svg className="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            <div className="logo-text">
+                                <h1>HotelFlow</h1>
+                                <p>Sistema de Reservaciones</p>
+                            </div>
+                        </div>
+                        <nav className="main-nav">
+                            <a href="#inicio" className="nav-link active">Inicio</a>
+                            <a href="#habitaciones" className="nav-link">Habitaciones</a>
+                            <a href="#servicios" className="nav-link">Servicios</a>
+                            <a href="#contacto" className="nav-link">Contacto</a>
+                        </nav>
+                        <div className="header-actions">
+                            <Link className="btn-outline" to="/login">Iniciar Sesión</Link>
+                            <Link className="btn-primary" to="/registro">Registrarse</Link>
+                        </div>
+                    </div>
+                </div>
+            </header>
 
-            {/* Hero Section */}
+            {/* Hero — sin animación scroll, está en el fold */}
             <section className="hero">
                 <div className="hero-overlay"></div>
                 <div className="container">
@@ -177,85 +146,62 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Features Section - ICONOS RESTAURADOS */}
+            {/* Features — sin animación scroll, está justo debajo del hero */}
             <section className="features">
                 <div className="container">
                     <div className="features-grid">
-                        {/* Feature 1 */}
                         <div className="feature-card">
-                            <div className="reveal">
-                                <div className="feature-icon feature-icon-blue">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                                        <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                                    </svg>
-                                </div>
-                                <h3>Múltiples Ubicaciones</h3>
-                                <p>Hoteles en las principales ciudades del país</p>
+                            <div className="feature-icon feature-icon-blue">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
                             </div>
+                            <h3>Múltiples Ubicaciones</h3>
+                            <p>Hoteles en las principales ciudades del país</p>
                         </div>
-
-                        {/* Feature 2 */}
                         <div className="feature-card">
-                            <div className="reveal">
-                                <div className="feature-icon feature-icon-green">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                    </svg>
-                                </div>
-                                <h3>Confirmación Inmediata</h3>
-                                <p>Reserva confirmada al instante sin esperas</p>
+                            <div className="feature-icon feature-icon-green">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
                             </div>
+                            <h3>Confirmación Inmediata</h3>
+                            <p>Reserva confirmada al instante sin esperas</p>
                         </div>
-
-                        {/* Feature 3 */}
                         <div className="feature-card">
-                            <div className="reveal">
-                                <div className="feature-icon feature-icon-purple">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                                    </svg>
-                                </div>
-                                <h3>Pago Seguro</h3>
-                                <p>Transacciones protegidas y cifradas</p>
+                            <div className="feature-icon feature-icon-purple">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
                             </div>
+                            <h3>Pago Seguro</h3>
+                            <p>Transacciones protegidas y cifradas</p>
                         </div>
-
-                        {/* Feature 4 */}
                         <div className="feature-card">
-                            <div className="reveal">
-                                <div className="feature-icon feature-icon-orange">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                </div>
-                                <h3>Soporte 24/7</h3>
-                                <p>Atención al cliente las 24 horas del día</p>
+                            <div className="feature-icon feature-icon-orange">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                </svg>
                             </div>
+                            <h3>Soporte 24/7</h3>
+                            <p>Atención al cliente las 24 horas del día</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Rooms Section */}
-            <section id="habitaciones" className="rooms">
-            {/* Rooms Section — scroll animation + carrusel con fade */}
+            {/* Rooms — scroll animation en tarjetas individuales */}
             <section id="habitaciones" className="rooms" ref={refRooms}>
                 <div className="container">
                     <div className="section-header">
-                        <div className="reveal">
-                            <h2 className="section-title">Nuestras Habitaciones</h2>
-                            <p className="section-subtitle">Espacios diseñados para su comodidad y productividad</p>
-                        </div>
-                    <div className={`section-header fade-in-section ${visibleRooms ? 'is-visible' : ''}`}>
                         <h2 className="section-title">Nuestras Habitaciones</h2>
                         <p className="section-subtitle">Espacios diseñados para su comodidad y productividad</p>
                     </div>
 
                     <div className="rooms-grid">
-                        {habitaciones.slice(0, 3).map((hab, index) => {
                         {habitaciones.slice(0, 3).map((hab, i) => {
                             const images = roomImages[hab.tipo] || roomImages['Individual'];
                             const currentIndex = currentImages[hab.id] ?? 0;
@@ -263,45 +209,7 @@ const Home = () => {
                             return (
                                 <article
                                     key={hab.id}
-                                    className="room-card"
-                                    onMouseEnter={() => handleMouseEnter(hab.id, hab.tipo)}
-                                    onMouseLeave={() => handleMouseLeave(hab.id)}
-                                >
-                                    <div className="reveal" style={{ transitionDelay: `${index * 0.15}s` }}>
-                                        <div className="room-carousel">
-                                            <img
-                                                src={images[currentIndex]}
-                                                alt={`${hab.tipo}`}
-                                                className="room-carousel-image"
-                                            />
-                                            <button className="carousel-btn carousel-btn-prev" onClick={(e) => { e.preventDefault(); prevImage(hab.id, hab.tipo); }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                    <polyline points="15 18 9 12 15 6"></polyline>
-                                                </svg>
-                                            </button>
-                                            <button className="carousel-btn carousel-btn-next" onClick={(e) => { e.preventDefault(); nextImage(hab.id, hab.tipo); }}>
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                    <polyline points="9 18 15 12 9 6"></polyline>
-                                                </svg>
-                                            </button>
-                                            <div className="carousel-dots">
-                                                {images.map((_, dotIdx) => (
-                                                    <button
-                                                        key={dotIdx}
-                                                        className={`carousel-dot ${dotIdx === currentIndex ? 'active' : ''}`}
-                                                        onClick={() => goToImage(hab.id, dotIdx)}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <div className="room-badge">{hab.estado}</div>
-                                            <div className="room-price">
-                                                <span className="price-amount">${hab.precio_noche}</span>
-                                                <span className="price-period">/noche</span>
-                                            </div>
-                                        </div>
-                                <article
-                                    key={hab.id}
-                                    className={`room-card fade-in-section ${visibleRooms ? 'is-visible' : ''}`}
+                                    className="room-card fade-in-section"
                                     style={{ transitionDelay: `${i * 0.15}s` }}
                                 >
                                     <div className="room-carousel">
@@ -345,31 +253,30 @@ const Home = () => {
                                         </div>
                                     </div>
 
-                                        <div className="room-content">
-                                            <h3 className="room-title">{hab.tipo}</h3>
-                                            <p className="room-description">
-                                                Perfecta para viajeros. Incluye escritorio ejecutivo, WiFi de alta velocidad y espacio de trabajo cómodo.
-                                            </p>
-                                            <div className="room-amenities">
-                                                <div className="amenity">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                                        <circle cx="9" cy="7" r="4"></circle>
-                                                    </svg>
-                                                    <span>Confortable</span>
-                                                </div>
-                                                <div className="amenity">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                        <path d="M2 4v16"></path>
-                                                        <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
-                                                    </svg>
-                                                    <span>Hab. {hab.num}</span>
-                                                </div>
+                                    <div className="room-content">
+                                        <h3 className="room-title">{hab.tipo}</h3>
+                                        <p className="room-description">
+                                            Perfecta para viajeros. Incluye escritorio ejecutivo, WiFi de alta velocidad y espacio de trabajo cómodo.
+                                        </p>
+                                        <div className="room-amenities">
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                    <circle cx="9" cy="7" r="4"></circle>
+                                                </svg>
+                                                <span>Confortable</span>
                                             </div>
-                                            <Link to="/registro" className="btn-reserve">
-                                                Reservar Ahora
-                                            </Link>
+                                            <div className="amenity">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path d="M2 4v16"></path>
+                                                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                                                </svg>
+                                                <span>Hab. {hab.num}</span>
+                                            </div>
                                         </div>
+                                        <Link to="/registro" className="btn-reserve">
+                                            Reservar Ahora
+                                        </Link>
                                     </div>
                                 </article>
                             );
@@ -378,85 +285,15 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Resto de secciones (Services, CTA, Footer) sin cambios de lógica */}
-            <section id="servicios" className="services">
-            {/* Services Section — scroll animation */}
+            {/* Services — scroll animation */}
             <section id="servicios" className="services" ref={refServices}>
                 <div className="container">
                     <div className="section-header">
-                        <div className="reveal">
-                            <h2 className="section-title">Servicios Adicionales</h2>
-                            <p className="section-subtitle">Complemente su estadía con nuestros servicios premium</p>
-                        </div>
-                    <div className={`section-header fade-in-section ${visibleServices ? 'is-visible' : ''}`}>
                         <h2 className="section-title">Servicios Adicionales</h2>
                         <p className="section-subtitle">Complemente su estadía con nuestros servicios premium</p>
                     </div>
                     <div className="services-grid">
-                        {[
-                            {
-                                title: "Desayuno Continental",
-                                desc: "Buffet completo de 6:00 AM a 10:00 AM",
-                                price: "+ $15/día",
-                                icon: (
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                    </svg>
-                                )
-                            },
-                            {
-                                title: "Late Check-out",
-                                desc: "Salida hasta las 4:00 PM",
-                                price: "+ $25",
-                                icon: (
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <polyline points="12 6 12 12 16 14"></polyline>
-                                    </svg>
-                                )
-                            },
-                            {
-                                title: "Traslado Aeropuerto",
-                                desc: "Servicio privado ida y vuelta",
-                                price: "+ $30",
-                                icon: (
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                    </svg>
-                                )
-                            }
-                        ].map((srv, index) => (
-                            <div
-                                key={index}
-                                className={`service-flip-card ${flippedServices[index] ? 'is-flipped' : ''} reveal`}
-                                onClick={() => toggleServiceFlip(index)}
-                                style={{ transitionDelay: `${index * 0.1}s` }}
-                            >
-                                <div className="service-flip-inner">
-                                    {/* PARTE FRONTAL */}
-                                    <div className="service-front">
-                                        <div className="service-icon" style={{ marginBottom: '1rem' }}>
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style={{ width: '2rem', opacity: 0.5 }}>
-                                                <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round" />
-                                            </svg>
-                                        </div>
-                                        <span>Clic para revelar servicio</span>
-                                    </div>
-
-                                    {/* PARTE TRASERA (CONTENIDO ORIGINAL) */}
-                                    <div className="service-back">
-                                        <div className="service-icon">
-                                            {srv.icon}
-                                        </div>
-                                        <h4>{srv.title}</h4>
-                                        <p>{srv.desc}</p>
-                                        <span className="service-price">{srv.price}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0s' }}>
+                        <div className="service-item fade-in-section" style={{ transitionDelay: '0s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -466,7 +303,7 @@ const Home = () => {
                             <p>Buffet completo de 6:00 AM a 10:00 AM</p>
                             <span className="service-price">+ $15/día</span>
                         </div>
-                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.15s' }}>
+                        <div className="service-item fade-in-section" style={{ transitionDelay: '0.15s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -477,7 +314,7 @@ const Home = () => {
                             <p>Salida hasta las 4:00 PM</p>
                             <span className="service-price">+ $25</span>
                         </div>
-                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.3s' }}>
+                        <div className="service-item fade-in-section" style={{ transitionDelay: '0.3s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -492,7 +329,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* CTA */}
             <section className="cta">
                 <div className="container">
                     <div className="cta-content">
@@ -503,7 +340,38 @@ const Home = () => {
                 </div>
             </section>
 
-            <Footer />
+            {/* Footer */}
+            <footer id="contacto" className="footer">
+                <div className="container">
+                    <div className="footer-grid">
+                        <div className="footer-section">
+                            <h3>HotelFlow</h3>
+                            <p>Sistema de reservaciones en línea para hoteles de categoría premium.</p>
+                        </div>
+                        <div className="footer-section">
+                            <h4>Contacto</h4>
+                            <p>Email: reservas@hotelflow.com</p>
+                            <p>Tel: +1 (555) 123-4567</p>
+                            <p>Soporte 24/7</p>
+                        </div>
+                        <div className="footer-section">
+                            <h4>Enlaces</h4>
+                            <a href="#">Términos y Condiciones</a>
+                            <a href="#">Política de Privacidad</a>
+                            <a href="#">Política de Cancelación</a>
+                        </div>
+                        <div className="footer-section">
+                            <h4>Horarios</h4>
+                            <p>Check-in: 3:00 PM</p>
+                            <p>Check-out: 12:00 PM</p>
+                            <p>Recepción: 24 horas</p>
+                        </div>
+                    </div>
+                    <div className="footer-bottom">
+                        <p>&copy; 2026 HotelFlow. Todos los derechos reservados.</p>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 };
