@@ -1373,13 +1373,37 @@ body {
    CARRUSEL DE IMÁGENES
    =================================================== */
 
+/* ===== ROOMS SECTION ===== */
+.rooms {
+    padding: 5rem 0;
+    background-color: var(--white);
+}
+
+.rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.room-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.room-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===== CARRUSEL ORIGINAL (RESPETADO) ===== */
 .room-carousel {
     position: relative;
-    width: 100%;
-    height: 240px;
+    height: 280px;
+    background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
     overflow: hidden;
-    border-radius: 0.75rem 0.75rem 0 0;
-    background: var(--bg-light);
 }
 
 .room-carousel-image {
@@ -1389,28 +1413,27 @@ body {
     transition: transform 0.3s ease;
 }
 
-.room-card:hover .room-carousel-image {
+.room-carousel:hover .room-carousel-image {
     transform: scale(1.05);
 }
 
-/* Botones de navegación del carrusel */
+/* Botones */
 .carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
     width: 2.5rem;
     height: 2.5rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    z-index: 10;
     opacity: 0;
-    z-index: 2;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .room-carousel:hover .carousel-btn {
@@ -1419,26 +1442,26 @@ body {
 
 .carousel-btn:hover {
     background: var(--white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-btn-prev {
+    left: 1rem;
+}
+
+.carousel-btn-next {
+    right: 1rem;
 }
 
 .carousel-btn svg {
     width: 1.25rem;
     height: 1.25rem;
-    color: var(--text-primary);
+    color: var(--primary-blue);
     stroke-width: 2.5;
 }
 
-.carousel-btn-prev {
-    left: 0.75rem;
-}
-
-.carousel-btn-next {
-    right: 0.75rem;
-}
-
-/* Indicadores de puntos */
+/* DOTS */
 .carousel-dots {
     position: absolute;
     bottom: 1rem;
@@ -1446,18 +1469,17 @@ body {
     transform: translateX(-50%);
     display: flex;
     gap: 0.5rem;
-    z-index: 2;
+    z-index: 10;
 }
 
 .carousel-dot {
-    width: 0.625rem;
-    height: 0.625rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 50%;
+    background: rgba(65, 65, 65, 0.5);
     border: none;
-    background: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     transition: all 0.3s ease;
-    padding: 0;
 }
 
 .carousel-dot:hover {
@@ -1466,25 +1488,21 @@ body {
 }
 
 .carousel-dot.active {
-    background: var(--white);
     width: 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--white);
 }
 
+/* ===== RESPONSIVE CARRUSEL ===== */
 @media (max-width: 768px) {
     .room-carousel {
-        height: 200px;
+        height: 220px;
     }
 
     .carousel-btn {
         width: 2rem;
         height: 2rem;
         opacity: 1;
-    }
-
-    .carousel-btn svg {
-        width: 1rem;
-        height: 1rem;
     }
 
     .carousel-btn-prev {
@@ -1495,16 +1513,161 @@ body {
         right: 0.5rem;
     }
 
+    .carousel-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
     .carousel-dots {
-        bottom: 0.75rem;
+        bottom: 0.5rem;
     }
 
     .carousel-dot {
-        width: 0.5rem;
-        height: 0.5rem;
+        width: 0.4rem;
+        height: 0.4rem;
     }
 
     .carousel-dot.active {
-        width: 1.25rem;
+        width: 1.2rem;
     }
 }
+
+/* ===== SCROLL ANIMATIONS ===== */
+.scroll-hidden {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.6s ease;
+}
+
+.scroll-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-top-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.scroll-top-btn.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Hover más dinámico sin cambiar tu diseño */
+.room-card,
+.feature-card,
+.service-item {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.room-card:hover,
+.feature-card:hover,
+.service-item:hover {
+    transform: translateY(-8px) scale(1.01);
+}
+
+/* Iconos reaccionan */
+.feature-card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+    transition: all 0.3s ease;
+}
+
+/* Estado inicial: invisible y un poco más abajo */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  visibility: hidden;
+}
+
+/* Estado activo: visible y en su posición original */
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* Opcional: Variaciones para que no todo suba igual */
+.reveal-left {
+  transform: translateX(-50px);
+}
+
+.reveal-right {
+  transform: translateX(50px);
+}
+
+/*ANIMACION DE SERVICIOS*/
+
+.service-flip-card {
+  background-color: transparent;
+  width: 100%;
+  height: 280px; 
+  perspective: 1200px; /* Aumentamos la perspectiva para un efecto más real */
+  cursor: pointer;
+}
+
+.service-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  /* Asegura que no haya "saltos" visuales */
+  will-change: transform; 
+}
+
+/* Cuando tiene la clase is-flipped, se mantiene girada */
+.service-flip-card.is-flipped .service-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.service-front, .service-back {
+  position: absolute;
+  inset: 0; /* Asegura que ocupen todo el contenedor */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.service-front {
+  background-color: var(--white);
+  /* No es necesario z-index si backface-visibility funciona bien */
+}
+
+.service-back {
+  background-color: #f8fafc;
+  transform: rotateY(180deg);
+  /* Importante: para que el contenido sea legible y no desaparezca */
+  visibility: visible; 
+}
+
+/* Cuando está girada, la trasera sube de nivel */
+.service-flip-card.is-flipped .service-back {
+  z-index: 3;
+}
+
+.service-flip-card.reveal {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
