@@ -24,33 +24,29 @@ const ClientDashboard = () => {
     const [buscando, setBuscando] = useState(false);
     const [errorBusqueda, setErrorBusqueda] = useState(null);
 
-    // Paginación
     const [paginaActual, setPaginaActual] = useState(1);
     const [totalPaginas, setTotalPaginas] = useState(1);
     const [totalHabitaciones, setTotalHabitaciones] = useState(0);
     const LIMIT = 10;
 
-    // Modal de reserva
     const [modalReservaAbierto, setModalReservaAbierto] = useState(false);
     const [habitacionSeleccionada, setHabitacionSeleccionada] = useState(null);
 
-    // Mis reservaciones
     const [misReservaciones, setMisReservaciones] = useState([]);
     const [cargandoReservas, setCargandoReservas] = useState(false);
 
-    // Filtros
     const FILTROS_VACIOS = { q: '', tipo: '', min: '', max: '', sort: 'precio_asc' };
     const [filtros, setFiltros] = useState(FILTROS_VACIOS);
     const [filtrosAplicados, setFiltrosAplicados] = useState(FILTROS_VACIOS);
     const [panelAbierto, setPanelAbierto] = useState(false);
     const hayFiltrosActivos = filtros.q || filtros.tipo || filtros.min || filtros.max;
 
-    // Carrusel con fade
     const { currentImages, fadingImages, nextImage, prevImage, goToImage, setCurrentImages }
         = useRoomCarousel(roomImages);
 
-    // Scroll animations — threshold 0 para activarse en cuanto entra al viewport
+    // Un ref por cada sección que queremos animar
     const [refHero,     visibleHero]     = useScrollAnimation(0);
+    const [refFeatures, visibleFeatures] = useScrollAnimation(0);
     const [refRooms,    visibleRooms]    = useScrollAnimation(0);
     const [refReservas, visibleReservas] = useScrollAnimation(0);
 
@@ -176,14 +172,17 @@ const ClientDashboard = () => {
         <div>
             <Header usuario={usuario} cerrarSesion={cerrarSesion} />
 
-            {/* HERO — fade-in al entrar al viewport */}
+            {/* Hero — ref asignado, se anima al cargar */}
             <div ref={refHero} className={`fade-in-section ${visibleHero ? 'is-visible' : ''}`}>
                 <Hero />
             </div>
 
-            <Features />
+            {/* Features — ref asignado */}
+            <div ref={refFeatures} className={`fade-in-section ${visibleFeatures ? 'is-visible' : ''}`}>
+                <Features />
+            </div>
 
-            {/* ROOMS — fade-in al hacer scroll */}
+            {/* Rooms — ref asignado */}
             <div ref={refRooms} className={`fade-in-section ${visibleRooms ? 'is-visible' : ''}`}>
                 <RoomsSection
                     habitaciones={habitaciones}
@@ -214,7 +213,7 @@ const ClientDashboard = () => {
                 />
             </div>
 
-            {/* MIS RESERVACIONES — fade-in al hacer scroll */}
+            {/* Mis Reservaciones — ref asignado */}
             {usuario && (
                 <section
                     ref={refReservas}
@@ -301,7 +300,6 @@ const ClientDashboard = () => {
                 </section>
             )}
 
-            {/* Modal de reserva */}
             {modalReservaAbierto && habitacionSeleccionada && (
                 <ReservaModal
                     hab={habitacionSeleccionada}
@@ -317,4 +315,3 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
- 

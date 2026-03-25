@@ -37,7 +37,7 @@ const Home = () => {
     const { currentImages, fadingImages, nextImage, prevImage, goToImage, setCurrentImages }
         = useRoomCarousel(roomImages);
 
-    // Solo animamos secciones que están DEBAJO del fold (services, cta)
+    // visibleRooms y visibleServices controlan la clase is-visible en los hijos también
     const [refRooms,    visibleRooms]    = useScrollAnimation(0);
     const [refServices, visibleServices] = useScrollAnimation(0);
 
@@ -94,7 +94,7 @@ const Home = () => {
                 </div>
             </header>
 
-            {/* Hero — sin animación scroll, está en el fold */}
+            {/* Hero */}
             <section className="hero">
                 <div className="hero-overlay"></div>
                 <div className="container">
@@ -146,7 +146,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Features — sin animación scroll, está justo debajo del hero */}
+            {/* Features */}
             <section className="features">
                 <div className="container">
                     <div className="features-grid">
@@ -193,7 +193,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Rooms — scroll animation en tarjetas individuales */}
+            {/* Rooms — ref en la sección, is-visible se propaga a las tarjetas hijas */}
             <section id="habitaciones" className="rooms" ref={refRooms}>
                 <div className="container">
                     <div className="section-header">
@@ -209,7 +209,8 @@ const Home = () => {
                             return (
                                 <article
                                     key={hab.id}
-                                    className="room-card fade-in-section"
+                                    // ✅ is-visible viene del padre visibleRooms
+                                    className={`room-card fade-in-section ${visibleRooms ? 'is-visible' : ''}`}
                                     style={{ transitionDelay: `${i * 0.15}s` }}
                                 >
                                     <div className="room-carousel">
@@ -285,7 +286,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Services — scroll animation */}
+            {/* Services — ref en la sección, is-visible se propaga a los hijos */}
             <section id="servicios" className="services" ref={refServices}>
                 <div className="container">
                     <div className="section-header">
@@ -293,7 +294,7 @@ const Home = () => {
                         <p className="section-subtitle">Complemente su estadía con nuestros servicios premium</p>
                     </div>
                     <div className="services-grid">
-                        <div className="service-item fade-in-section" style={{ transitionDelay: '0s' }}>
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -303,7 +304,7 @@ const Home = () => {
                             <p>Buffet completo de 6:00 AM a 10:00 AM</p>
                             <span className="service-price">+ $15/día</span>
                         </div>
-                        <div className="service-item fade-in-section" style={{ transitionDelay: '0.15s' }}>
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.15s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -314,7 +315,7 @@ const Home = () => {
                             <p>Salida hasta las 4:00 PM</p>
                             <span className="service-price">+ $25</span>
                         </div>
-                        <div className="service-item fade-in-section" style={{ transitionDelay: '0.3s' }}>
+                        <div className={`service-item fade-in-section ${visibleServices ? 'is-visible' : ''}`} style={{ transitionDelay: '0.3s' }}>
                             <div className="service-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
