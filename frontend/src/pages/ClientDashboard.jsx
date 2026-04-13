@@ -15,6 +15,8 @@ import { roomImages } from "../constants/roomImages";
 
 import useRoomCarousel from '../hooks/useRoomCarousel';
 import useScrollAnimation from '../hooks/useScrollAnimation';
+import MensajeLogin from '../components/ui/MensajeLogin';
+<MensajeLogin />
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);
@@ -170,6 +172,7 @@ const ClientDashboard = () => {
 
     return (
         <div>
+            <MensajeLogin />
             <Header usuario={usuario} cerrarSesion={cerrarSesion} />
 
             {/* Hero — ref asignado, se anima al cargar */}

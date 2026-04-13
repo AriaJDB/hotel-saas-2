@@ -7,6 +7,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ClientDashboard from './pages/ClientDashboard';
 import CleaningDashboard from './pages/CleaningDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import RecuperarPassword from './pages/RecuperarPassword';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/recuperar" element={<RecuperarPassword />} />
         <Route path="/admin" element={
           <ProtectedRoute rolesPermitidos={['admin']} redireccion="/login">
             <AdminDashboard />

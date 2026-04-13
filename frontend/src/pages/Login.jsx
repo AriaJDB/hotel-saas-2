@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Login.css';
+import MensajeLogin from '../components/ui/MensajeLogin';
 
 // Función reutilizable: determina la ruta según el tipo de usuario
 export const obtenerRutaPorTipo = (tipo) => {
@@ -17,30 +18,52 @@ const Login = () => {
     const [correo, setCorreo] = useState('');
     const [contrasena, setContrasena] = useState('');
     const navigate = useNavigate();
+    const [mensaje, setMensaje] = useState('');
+    const [tipoMensaje, setTipoMensaje] = useState('success');
 
     const manejarLogin = async (e) => {
         e.preventDefault();
+
         try {
             const respuesta = await axios.post('http://localhost:3000/usuarios/login', {
                 correo,
                 contrasena
             });
 
-            if (respuesta.data && typeof respuesta.data === 'object') {
-                alert(`¡Bienvenido ${respuesta.data.nombre}!`);
-                localStorage.setItem('usuario', JSON.stringify(respuesta.data));
+                if (respuesta.data && respuesta.data.tipo){
+
+                // ✅ sesión con expiración
+                const sesion = {
+                    ...respuesta.data,
+                    expira: Date.now() + (30 * 60 * 1000)
+                };
+
+                localStorage.setItem('usuario', JSON.stringify(sesion));
+
+                // ✅ mensaje éxito (para dashboard)
+                localStorage.setItem('mensajeLogin', `Bienvenido ${respuesta.data.nombre}`);
+                localStorage.setItem('tipoMensaje', 'success');
+
                 navigate(obtenerRutaPorTipo(respuesta.data.tipo));
+
             } else {
-                alert("Credenciales incorrectas. Verifica tu correo y contraseña.");
+                // ❌ credenciales incorrectas (se queda en login)
+                setMensaje('Credenciales incorrectas');
+                setTipoMensaje('error');
             }
+
         } catch (error) {
             console.error('Error en login:', error);
-            alert("Error al iniciar sesión. Por favor intenta de nuevo.");
+
+            // ❌ error servidor
+            setMensaje('Error al iniciar sesión');
+            setTipoMensaje('error');
         }
     };
 
     return (
         <div>
+            <MensajeLogin />
             {/* Header */}
             <header className="header">
                 <div className="container">
@@ -77,6 +100,17 @@ const Login = () => {
                                 <h2>Bienvenido de Nuevo</h2>
                                 <p>Ingrese sus credenciales para acceder a su cuenta</p>
                             </div>
+                            {mensaje && (
+                                <div style={{
+                                    background: tipoMensaje === 'error' ? '#ef4444' : '#22c55e',
+                                    color: 'white',
+                                    padding: '10px',
+                                    borderRadius: '6px',
+                                    marginBottom: '10px'
+                                }}>
+                                    {mensaje}
+                                </div>
+                            )}
 
                             <form className="auth-form" onSubmit={manejarLogin}>
                                 <div className="form-field">
@@ -113,6 +147,11 @@ const Login = () => {
                                 <button type="submit" className="btn-submit">
                                     Iniciar Sesión
                                 </button>
+                                <p style={{ marginTop: "10px", textAlign: "center" }}>
+                                    <Link to="/recuperar" className="link-primary">
+                                        ¿Olvidaste tu contraseña?
+                                    </Link>
+                                </p>
                             </form>
 
                             <div className="auth-footer">

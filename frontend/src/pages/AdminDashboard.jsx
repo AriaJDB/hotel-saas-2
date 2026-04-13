@@ -11,6 +11,10 @@ import '../styles/AdminStyles.css';
 import AdminHeader from '../components/admin/adminHeader';
 import DashboardStats from "../components/admin/DashboardStats";
 import { useAdminForms } from "../hooks/useAdminForms";
+import MensajeLogin from '../components/ui/MensajeLogin';
+import '../styles/carousel-transition.css';
+import '../styles/scroll-animations.css';
+
 
 // ========== COMPONENTE BUSCADOR (fuera del componente principal para evitar re-renders) ==========
 const Buscador = ({ valor, onChange, placeholder }) => (
@@ -274,6 +278,7 @@ const AdminDashboard = () => {
 
     return (
         <div>
+            <MensajeLogin />
             {/* Header */}
             <AdminHeader
                 usuario={usuario}

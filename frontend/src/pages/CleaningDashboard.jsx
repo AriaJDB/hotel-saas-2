@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Footer from '../components/layout/Footer';
 import '../styles/CleaningStyles.css';
+import MensajeLogin from '../components/ui/MensajeLogin';
+
 
 const CleaningDashboard = () => {
     const [usuario, setUsuario] = useState(null);
@@ -45,6 +47,7 @@ const CleaningDashboard = () => {
 
     return (
         <div>
+            <MensajeLogin />
             {/* Header */}
             <header className="header">
                 <div className="container">
