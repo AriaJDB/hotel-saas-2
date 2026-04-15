@@ -28,3 +28,14 @@ export const eliminarUsuario = async (id) => {
     const { data } = await axios.delete(`${API_URL}/${id}`);
     return data;
 };
+
+export const solicitarRecuperacion = async (correo) => {
+    const { data } = await axios.post(`${API_URL}/solicitar-recuperacion`, { correo });
+    return data;
+};
+
+export const resetPassword = async (token, nuevaPassword) => {
+    const { data } = await axios.post(`${API_URL}/reset-password`, { token, nuevaPassword });
+    return data;
+};
+

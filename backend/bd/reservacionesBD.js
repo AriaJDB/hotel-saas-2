@@ -1,6 +1,6 @@
 const { reservacionesBD, habitacionesBD } = require("./conexion");
 
-const ESTADOS_VALIDOS = ["Confirmada", "Check-in", "Check-out", "Cancelada"];
+const ESTADOS_VALIDOS = ["Confirmada", "Check-in", "Check-out", "Cancelada", "Cobrada"];
 
 
 function fechaHoy() {
@@ -86,8 +86,9 @@ async function nuevaReservacion(datos) {
 
         const docRef = await reservacionesBD.add(doc);
 
-        // Marcar la habitación como Ocupada automáticamente
-        await actualizarEstadoHabitacion(num_hab, "Ocupada");
+        // NO marcamos la habitación como Ocupada aquí.
+        // El estado cambia a "Ocupada" solo cuando se hace Check-in real.
+        // Hasta entonces la habitación sigue "Disponible" para otras fechas.
 
         return { exito: true, mensaje: "Reservación creada exitosamente", id: docRef.id };
     } catch (error) {

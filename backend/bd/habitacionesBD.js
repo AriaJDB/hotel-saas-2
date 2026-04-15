@@ -1,5 +1,5 @@
 const Habitacion = require("../clases/Habitacion");
-const { habitacionesBD } = require("./conexion");
+const { habitacionesBD, reservacionesBD } = require("./conexion");
 
 function validarDatos(habitacion) {
     return habitacion.num !== undefined &&
@@ -62,7 +62,31 @@ async function obtenerHabitacionesFiltradas(filtros = {}) {
             ...doc.data()
         }));
 
-        resultado = resultado.filter(h => h.estado === "Disponible");
+        // Solo habitaciones en estado aceptable para clientes (excluye Mantenimiento)
+        resultado = resultado.filter(h =>
+            h.estado === "Disponible" || h.estado === "Limpiando" || h.estado === "Limpieza"
+        );
+
+        // ── Filtro por fechas: excluir habitaciones con reserva activa que se solape ──
+        const { fechaEntrada, fechaSalida } = filtros;
+        if (fechaEntrada && fechaSalida) {
+            // Obtener reservaciones activas (Confirmada o Check-in)
+            const resSnap = await reservacionesBD
+                .where("estado_reserva", "in", ["Confirmada", "Check-in"])
+                .get();
+
+            // Números de habitación ocupados en ese rango
+            const numOcupados = new Set();
+            resSnap.forEach(doc => {
+                const r = doc.data();
+                // Hay solapamiento si: entrada < fechaSalida Y salida > fechaEntrada
+                if (r.fecha_entrada < fechaSalida && r.fecha_salida > fechaEntrada) {
+                    numOcupados.add(Number(r.num_hab));
+                }
+            });
+
+            resultado = resultado.filter(h => !numOcupados.has(Number(h.num)));
+        }
 
         if (filtros.q) {
             const q = filtros.q.toLowerCase().trim();

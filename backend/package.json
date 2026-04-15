@@ -6,7 +6,8 @@
     "express": "^5.2.1",
     "express-session": "^1.18.2",
     "firebase-admin": "^13.6.0",
-    "mysql2": "^3.16.1"
+    "mysql2": "^3.16.1",
+    "nodemailer": "^8.0.5"
   },
   "name": "backend",
   "version": "1.0.0",

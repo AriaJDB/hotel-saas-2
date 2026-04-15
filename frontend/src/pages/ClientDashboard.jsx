@@ -4,19 +4,19 @@ import '../styles/scroll-animations.css';
 import '../styles/carousel-transition.css';
 
 import { obtenerHabitaciones } from "../api/habitacionesService";
-import { crearReservacion, obtenerMisReservaciones, cancelarReservacion } from "../api/reservacionesService";
+import { crearReservacion, obtenerMisReservaciones, cancelarReservacion, actualizarReservacion } from "../api/reservacionesService";
 import Header from "../components/layout/Header";
 import Hero from '../components/layout/Hero';
 import Features from '../components/layout/Features';
 import RoomsSection from "../components/rooms/RoomsSection";
 import ReservaModal from "../components/rooms/ReservaModal";
+import EditarReservaModal from "../components/rooms/EditarReservaModal";
 import Footer from "../components/layout/Footer";
 import { roomImages } from "../constants/roomImages";
 
 import useRoomCarousel from '../hooks/useRoomCarousel';
 import useScrollAnimation from '../hooks/useScrollAnimation';
 import MensajeLogin from '../components/ui/MensajeLogin';
-<MensajeLogin />
 
 const ClientDashboard = () => {
     const [usuario, setUsuario] = useState(null);
@@ -36,6 +36,7 @@ const ClientDashboard = () => {
 
     const [misReservaciones, setMisReservaciones] = useState([]);
     const [cargandoReservas, setCargandoReservas] = useState(false);
+    const [reservaEditando, setReservaEditando] = useState(null); // reserva en edición
 
     const FILTROS_VACIOS = { q: '', tipo: '', min: '', max: '', sort: 'precio_asc' };
     const [filtros, setFiltros] = useState(FILTROS_VACIOS);
@@ -129,6 +130,15 @@ const ClientDashboard = () => {
         }
     };
 
+    const handleGuardarEdicion = async (id, datos) => {
+        const resultado = await actualizarReservacion(id, datos);
+        if (resultado?.exito !== false) {
+            cargarMisReservaciones(usuario.id);
+        } else {
+            throw new Error(resultado?.mensaje || "Error al actualizar");
+        }
+    };
+
     const cambiarPagina = (nuevaPagina) => {
         if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
         cargarHabitaciones(nuevaPagina);
@@ -216,11 +226,9 @@ const ClientDashboard = () => {
                 />
             </div>
 
-            {/* Mis Reservaciones — ref asignado */}
+            {/* Mis Reservaciones */}
             {usuario && (
                 <section
-                    ref={refReservas}
-                    className={`fade-in-section ${visibleReservas ? 'is-visible' : ''}`}
                     style={{ padding: "3rem 0", background: "#f8fafc" }}
                 >
                     <div className="container">
@@ -284,14 +292,23 @@ const ClientDashboard = () => {
                                                     }}>
                                                         {reserva.estado_reserva}
                                                     </span>
-                                                    {reserva.estado_reserva === "Confirmada" && (
-                                                        <button
-                                                            className="btn-secondary"
-                                                            style={{ padding: "6px 14px", fontSize: "0.85rem" }}
-                                                            onClick={() => handleCancelarReserva(reserva.id)}
-                                                        >
-                                                            Cancelar
-                                                        </button>
+                                                     {reserva.estado_reserva === "Confirmada" && (
+                                                        <>
+                                                            <button
+                                                                className="btn-secondary"
+                                                                style={{ padding: "6px 14px", fontSize: "0.85rem" }}
+                                                                onClick={() => setReservaEditando(reserva)}
+                                                            >
+                                                                ✏️ Editar
+                                                            </button>
+                                                            <button
+                                                                className="btn-secondary"
+                                                                style={{ padding: "6px 14px", fontSize: "0.85rem", color: "#dc2626", borderColor: "#dc2626" }}
+                                                                onClick={() => handleCancelarReserva(reserva.id)}
+                                                            >
+                                                                Cancelar
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
@@ -309,6 +326,15 @@ const ClientDashboard = () => {
                     usuario={usuario}
                     onClose={() => { setModalReservaAbierto(false); setHabitacionSeleccionada(null); }}
                     onConfirmar={handleConfirmarReserva}
+                />
+            )}
+
+            {/* Modal editar reservación */}
+            {reservaEditando && (
+                <EditarReservaModal
+                    reserva={reservaEditando}
+                    onClose={() => setReservaEditando(null)}
+                    onGuardar={handleGuardarEdicion}
                 />
             )}
 

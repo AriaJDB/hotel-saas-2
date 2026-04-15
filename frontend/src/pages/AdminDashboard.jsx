@@ -383,7 +383,12 @@ const AdminDashboard = () => {
                             <div style={{ padding: '1rem 0' }}>
                                 <Buscador valor={busquedaReservaciones} onChange={setBusquedaReservaciones} placeholder="Buscar por habitación, usuario, estado..." />
                             </div>
-                            <ReservacionesSection reservaciones={reservacionesFiltradas} abrirModal={(modo, item) => abrirModal('reservacion', modo, item)} eliminarReservacion={eliminarReservacion} />
+                            <ReservacionesSection
+                                reservaciones={reservacionesFiltradas}
+                                abrirModal={(modo, item) => abrirModal('reservacion', modo, item)}
+                                eliminarReservacion={eliminarReservacion}
+                                onRecargar={cargarDatos}
+                            />
                         </>
                     )}
 

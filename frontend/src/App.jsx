@@ -8,6 +8,7 @@ import ClientDashboard from './pages/ClientDashboard';
 import CleaningDashboard from './pages/CleaningDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RecuperarPassword from './pages/RecuperarPassword';
+import NuevaPassword from './pages/NuevaPassword';
 
 function App() {
   return (
@@ -17,13 +18,14 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
         <Route path="/recuperar" element={<RecuperarPassword />} />
+        <Route path="/nueva-password" element={<NuevaPassword />} />
         <Route path="/admin" element={
           <ProtectedRoute rolesPermitidos={['admin']} redireccion="/login">
             <AdminDashboard />
           </ProtectedRoute>
         } />
         <Route path="/dashboard" element={
-          <ProtectedRoute rolesPermitidos={['usuario', 'empleado']} redireccion="/login">
+          <ProtectedRoute rolesPermitidos={['usuario']} redireccion="/login">
             <ClientDashboard />
           </ProtectedRoute>
         } />
