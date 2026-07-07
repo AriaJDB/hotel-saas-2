@@ -9,6 +9,8 @@ import CleaningDashboard from './pages/CleaningDashboard';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import RecuperarPassword from './pages/RecuperarPassword';
 import NuevaPassword from './pages/NuevaPassword';
+import AvisoDePrivacidad from './pages/AvisoDePrivacidad';
+import PoliticaDePrivacidad from './pages/PoliticaDePrivacidad';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/registro" element={<Registro />} />
         <Route path="/recuperar" element={<RecuperarPassword />} />
         <Route path="/nueva-password" element={<NuevaPassword />} />
+        <Route path="/aviso-privacidad" element={<AvisoDePrivacidad />} />
+        <Route path="/politica-privacidad" element={<PoliticaDePrivacidad />} />
         <Route path="/admin" element={
           <ProtectedRoute rolesPermitidos={['admin']} redireccion="/login">
             <AdminDashboard />

@@ -33,3 +33,4 @@ const puerto = process.env.PORT || 3000;
 app.listen(puerto, () => {
     console.log(`Servidor en http://localhost:${puerto}`);
 });
+// Nodemon trigger restart after keys.json added

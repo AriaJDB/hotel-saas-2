@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
     return (
         <footer className="footer">
@@ -20,8 +22,12 @@ const Footer = () => {
                         <p>Recepción: 24 horas</p>
                     </div>
                 </div>
-                <div className="footer-bottom">
+                <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <p>&copy; 2026 HotelFlow. Todos los derechos reservados.</p>
+                    <div style={{ display: 'flex', gap: '1.5rem' }}>
+                        <Link to="/aviso-privacidad" style={{ textDecoration: 'underline', fontSize: '0.85rem' }}>Aviso de Privacidad</Link>
+                        <Link to="/politica-privacidad" style={{ textDecoration: 'underline', fontSize: '0.85rem' }}>Política de Privacidad</Link>
+                    </div>
                 </div>
             </div>
         </footer>

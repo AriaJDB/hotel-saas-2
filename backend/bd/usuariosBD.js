@@ -1,3 +1,4 @@
+const admin = require("firebase-admin");
 const { usuariosBD } = require("./conexion");
 const { encriptarPassword, validarPassword } = require("../middlewares/funcionesPassword");
 const { enviarCorreoRecuperacion } = require("../middlewares/correoService");
@@ -16,6 +17,10 @@ async function nuevoUsuario(datos) {
         console.error("Error: Faltan nombre o correo");
         return false;
     }
+    if (datos.privacy_consent_accepted !== true) {
+        console.error("Error: Se requiere consentimiento del Aviso de Privacidad y Política de Privacidad");
+        return false;
+    }
 
     const { salt, hash } = encriptarPassword(passwordPlano);
 
@@ -26,7 +31,9 @@ async function nuevoUsuario(datos) {
         telefono: datos.telefono || "",
         tipo: TIPOS_VALIDOS.includes(datos.tipo) ? datos.tipo : "usuario",
         hash,
-        salt
+        salt,
+        privacy_consent_accepted: true,
+        privacy_consent_accepted_at: admin.firestore.Timestamp.now()
     };
 
     try {

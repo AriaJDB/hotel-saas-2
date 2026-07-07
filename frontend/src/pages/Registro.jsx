@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/ClientStyles.css';
+import AvisoDePrivacidad from './AvisoDePrivacidad';
+import PoliticaDePrivacidad from './PoliticaDePrivacidad';
 
 const Registro = () => {
     const [formData, setFormData] = useState({
@@ -11,7 +13,21 @@ const Registro = () => {
         confirmarContrasena: '',
         tipo: 'cliente'
     });
+    const [privacyConsent, setPrivacyConsent] = useState(false);
+    const [mostrarAviso, setMostrarAviso] = useState(false);
+    const [mostrarPolitica, setMostrarPolitica] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const manejarEscape = (e) => {
+            if (e.key === 'Escape') {
+                setMostrarAviso(false);
+                setMostrarPolitica(false);
+            }
+        };
+        window.addEventListener('keydown', manejarEscape);
+        return () => window.removeEventListener('keydown', manejarEscape);
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -23,6 +39,11 @@ const Registro = () => {
     const manejarEnvio = async (e) => {
         e.preventDefault();
 
+        if (!privacyConsent) {
+            alert("Debe aceptar el Aviso de Privacidad y la Política de Privacidad para registrarse.");
+            return;
+        }
+
         if (formData.contrasena !== formData.confirmarContrasena) {
             alert("Las contraseñas no coinciden");
             return;
@@ -33,7 +54,8 @@ const Registro = () => {
                 nombre: formData.nombre,
                 correo: formData.correo,
                 contrasena: formData.contrasena,
-                tipo: formData.tipo
+                tipo: formData.tipo,
+                privacy_consent_accepted: true
             });
 
             if (respuesta.data === true) {
@@ -146,14 +168,43 @@ const Registro = () => {
                                     </div>
                                 </div>
 
-                                <div className="form-section">
-                                    <label className="checkbox-label-block">
-                                        <input type="checkbox" required />
-                                        <span>Acepto los Términos y Condiciones y la Política de Privacidad</span>
+                                <div className="form-section" style={{ marginBottom: '1.5rem' }}>
+                                    <label className="checkbox-label-block" style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            id="privacy-consent-checkbox"
+                                            name="privacyConsent"
+                                            checked={privacyConsent}
+                                            onChange={(e) => setPrivacyConsent(e.target.checked)}
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="privacy-hint"
+                                            style={{ width: 'auto', marginTop: '4px', cursor: 'pointer' }}
+                                        />
+                                        <span id="privacy-hint" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                                            He leído y acepto el{' '}
+                                            <button
+                                                type="button"
+                                                className="link-button"
+                                                onClick={() => setMostrarAviso(true)}
+                                                aria-haspopup="dialog"
+                                            >
+                                                Aviso de Privacidad
+                                            </button>{' '}
+                                            y la{' '}
+                                            <button
+                                                type="button"
+                                                className="link-button"
+                                                onClick={() => setMostrarPolitica(true)}
+                                                aria-haspopup="dialog"
+                                            >
+                                                Política de Privacidad
+                                            </button>
+                                        </span>
                                     </label>
                                 </div>
 
-                                <button type="submit" className="btn-submit">
+                                <button type="submit" className="btn-submit" disabled={!privacyConsent}>
                                     Crear Cuenta
                                 </button>
                             </form>
@@ -185,11 +236,93 @@ const Registro = () => {
                             <p>Check-out: 12:00 PM</p>
                         </div>
                     </div>
-                    <div className="footer-bottom">
+                    <div className="footer-bottom" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                         <p>&copy; 2026 HotelFlow. Todos los derechos reservados.</p>
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
+                            <Link to="/aviso-privacidad" style={{ textDecoration: 'underline', fontSize: '0.85rem' }}>Aviso de Privacidad</Link>
+                            <Link to="/politica-privacidad" style={{ textDecoration: 'underline', fontSize: '0.85rem' }}>Política de Privacidad</Link>
+                        </div>
                     </div>
                 </div>
             </footer>
+
+            {/* Modal Aviso de Privacidad */}
+            {mostrarAviso && (
+                <div 
+                    className="modal-overlay" 
+                    onClick={() => setMostrarAviso(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="aviso-modal-title"
+                >
+                    <div 
+                        className="modal-content" 
+                        onClick={(e) => e.stopPropagation()} 
+                        style={{ maxWidth: '750px' }}
+                    >
+                        <div className="modal-header">
+                            <h2 id="aviso-modal-title">Aviso de Privacidad</h2>
+                            <button 
+                                className="modal-close" 
+                                onClick={() => setMostrarAviso(false)}
+                                aria-label="Cerrar modal"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <AvisoDePrivacidad isModal={true} />
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-secondary" 
+                                onClick={() => setMostrarAviso(false)}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Política de Privacidad */}
+            {mostrarPolitica && (
+                <div 
+                    className="modal-overlay" 
+                    onClick={() => setMostrarPolitica(false)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="politica-modal-title"
+                >
+                    <div 
+                        className="modal-content" 
+                        onClick={(e) => e.stopPropagation()} 
+                        style={{ maxWidth: '750px' }}
+                    >
+                        <div className="modal-header">
+                            <h2 id="politica-modal-title">Política de Privacidad</h2>
+                            <button 
+                                className="modal-close" 
+                                onClick={() => setMostrarPolitica(false)}
+                                aria-label="Cerrar modal"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="modal-body">
+                            <PoliticaDePrivacidad isModal={true} />
+                        </div>
+                        <div className="modal-footer">
+                            <button 
+                                className="btn-secondary" 
+                                onClick={() => setMostrarPolitica(false)}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
