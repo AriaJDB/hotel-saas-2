@@ -18,6 +18,16 @@ const PoliticaDePrivacidad = ({ isModal = false }) => {
             <div className="legal-content">
                 <h1 style={{ color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>Política de Privacidad</h1>
                 <p className="legal-meta">Última actualización: 6 de julio de 2026</p>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <a href="/docs/Politica_de_Privacidad_HotelFlow.pdf" download className="btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar PDF
+                    </a>
+                </div>
 
                 <p className="legal-paragraph">
                     La presente Política de Privacidad de <strong>HotelFlow S.A. de C.V.</strong> ("HotelFlow") describe de manera clara y transparente nuestras prácticas relativas a la recolección, uso, almacenamiento, seguridad, retención y eliminación de los datos personales de nuestros usuarios en este sitio web y aplicación móvil (el "Sitio").

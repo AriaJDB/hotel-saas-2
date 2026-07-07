@@ -18,6 +18,16 @@ const AvisoDePrivacidad = ({ isModal = false }) => {
             <div className="legal-content">
                 <h1 style={{ color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>Aviso de Privacidad</h1>
                 <p className="legal-meta">Última actualización: 6 de julio de 2026</p>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <a href="/docs/Aviso_de_Privacidad_HotelFlow.pdf" download className="btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', padding: '0.5rem 1rem' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar PDF
+                    </a>
+                </div>
 
                 <p className="legal-paragraph">
                     En cumplimiento con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> de México (texto vigente con última reforma publicada en el Diario Oficial de la Federación el 14-11-2025), <strong>HotelFlow S.A. de C.V.</strong> (en adelante, "HotelFlow" o "el Responsable"), con domicilio en <em>Avenida de la Reforma 123, Colonia Centro, Ciudad de México, C.P. 06000</em>, pone a su disposición el presente Aviso de Privacidad.
