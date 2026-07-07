@@ -42,7 +42,7 @@ const PoliticaDePrivacidad = ({ isModal = false }) => {
                     <li className="legal-list-item"><strong>Seguridad de credenciales:</strong> Las contraseñas se protegen mediante algoritmos hash criptográficos con salting, lo que impide que puedan leerse o recuperarse en texto plano incluso para nuestros administradores.</li>
                 </ul>
                 <p className="legal-paragraph">
-                    <em>{`/* TODO: Implementar configuración de HSTS estricta en producción, auditorías automáticas de dependencias (npm audit) y auditorías externas de seguridad periódicas */`}</em>
+                    <em>HotelFlow revisa y refuerza continuamente sus medidas de seguridad conforme evoluciona la plataforma y las mejores prácticas de la industria.</em>
                 </p>
 
                 <h3 className="legal-section-title">3. Período de Retención y Condiciones de Eliminación</h3>

@@ -36,7 +36,7 @@ const AvisoDePrivacidad = ({ isModal = false }) => {
                     <strong>Datos Personales Sensibles:</strong> Declaramos que para el registro en nuestra plataforma <strong>no se recaban datos personales sensibles</strong> (tales como origen étnico, estado de salud, información genética, creencias religiosas, filosóficas o morales, afiliación sindical, opiniones políticas o preferencia sexual).
                 </p>
                 <p className="legal-paragraph">
-                    Para el procesamiento de reservaciones y transacciones de pago, se recabarán adicionalmente datos financieros y patrimoniales (como números de tarjeta de crédito/débito, fecha de vencimiento y código de seguridad), los cuales son tratados con cifrado estricto y bajo las más altas medidas de seguridad bancaria, requiriendo su consentimiento expreso al momento de la compra.
+                    Para el procesamiento de pagos, los datos financieros y patrimoniales (como números de tarjeta de crédito/débito, fecha de vencimiento y código de seguridad) son capturados y procesados directamente por nuestro proveedor de servicios de pago, certificado bajo el estándar PCI-DSS. HotelFlow no almacena estos datos completos en sus propios servidores. El tratamiento de estos datos requiere su consentimiento expreso al momento de la compra.
                 </p>
 
                 <h3 className="legal-section-title">2. Finalidades del Tratamiento</h3>
