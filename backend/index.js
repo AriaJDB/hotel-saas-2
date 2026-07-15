@@ -12,7 +12,15 @@ const autoCheckout = require("./jobs/autoCheckout");
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://localhost',
+        'http://localhost',
+        'http://localhost:5173',  // dev local
+        'http://localhost:3000',
+    ],
+    credentials: true
+}));
 
 app.use(session({
     name: 'session',
