@@ -8,7 +8,7 @@ import HabitacionesAdminSection from '../components/admin/sections/HabitacionesA
 import ReservacionesSection from '../components/admin/sections/ReservacionesSection';
 import { useAdminData } from '../hooks/useAdminData';
 import '../styles/AdminStyles.css';
-import AdminHeader from '../components/admin/adminHeader';
+import AdminHeader from '../components/admin/AdminHeader';
 import DashboardStats from "../components/admin/DashboardStats";
 import { useAdminForms } from "../hooks/useAdminForms";
 import MensajeLogin from '../components/ui/MensajeLogin';

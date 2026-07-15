@@ -16,3 +16,6 @@ npm-debug.log*
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Certificados SSL (no subir a GitHub, son locales)
+nginx/certs/

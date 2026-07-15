@@ -1,7 +1,7 @@
 const admin = require("firebase-admin");
 const path = require("path");
 
-const rutaLlave = path.join(__dirname, "..", "..", "keys.json");
+const rutaLlave = process.env.FIREBASE_KEY_PATH || path.join(__dirname, "..", "..", "keys.json");
 
 try {
     const llaves = require(rutaLlave);
