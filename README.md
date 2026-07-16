@@ -1,71 +1,193 @@
 # 🏨 Hotel SaaS - Sistema de Gestión de Reservaciones
 
-Este proyecto es un sistema de gestión hotelera bajo el modelo **SaaS (Software as a Service)**, desarrollado para la materia de Desarrollo Web Profesional del 8vo cuatrimestre. El sistema permite la administración de usuarios, autenticación segura y control de acceso basado en roles.
+Este proyecto es una solución de gestión hotelera bajo el modelo SaaS, desarrollada para la materia de Desarrollo Web Profesional. El sistema permite administrar habitaciones, reservaciones, usuarios, artículos y pedidos, además de manejar autenticación, recuperación de contraseña y sesiones de usuario.
 
 ## 📂 Estructura del Proyecto
 
-El proyecto se divide en dos grandes módulos para separar la lógica de negocio de la interfaz de usuario:
+El repositorio está organizado en tres bloques principales:
 
-### 🖥️ Backend (Node.js & Express)
-Organizado de forma modular siguiendo principios de arquitectura limpia:
-* **bd/**: Contiene la conexión a Firestore (`conexion.js`) y el CRUD de datos (`usuariosBD.js`).
-* **clases/**: Modelos de datos (POJO) con validaciones mediante Setters y Getters (ej. `Usuario.js`).
-* **middlewares/**: Lógica de seguridad como encriptación y validación de sesiones (`funcionesPassword.js`).
-* **rutas/**: Definición de endpoints de la API (`rutasUsuarios.js`).
-* **index.js**: Punto de entrada y configuración de middlewares globales.
+### 🖥️ Backend
+Carpeta: `backend/`
 
-### 🎨 Frontend (React + Vite)
-Interfaz moderna y eficiente:
-* **api/**: Servicios de comunicación con el backend usando Axios.
-* **pages/**: Vistas principales de la aplicación (Login, Registro).
-* **assets/**: Recursos estáticos y hojas de estilo CSS.
-* **App.jsx**: Manejo de rutas y navegación.
+- `bd/`: conexión y acceso a datos con Firestore.
+- `clases/`: modelos de negocio (`Usuario`, `Habitacion`, `Reservacion`, `Articulo`, `Pedido`).
+- `middlewares/`: servicios de correo, recuperación de contraseña y funciones de seguridad.
+- `rutas/`: endpoints HTTP de la API.
+- `jobs/`: tareas programadas como `autoCheckout.js`.
+- `index.js`: configuración global de Express, CORS, sesiones y rutas.
+
+### 🎨 Frontend
+Carpeta: `frontend/`
+
+- `src/api/`: servicios para consumir el backend.
+- `src/pages/`: vistas del sistema.
+- `src/components/`: componentes reutilizables y secciones administrativas.
+- `src/hooks/`: hooks para datos y lógica de UI.
+- `src/styles/`: hojas de estilo.
+
+### ⚙️ Infraestructura
+
+- `docker-compose.yml`: orquestación con frontend, backend y Nginx.
+- `nginx/`: configuración del proxy inverso.
+- `keys.json`: credenciales de Firebase / servicio de autenticación para el backend.
 
 ## 🛠️ Stack Tecnológico
-* **Frontend**: React.js, Vite, React Router, Axios.
-* **Backend**: Node.js, Express, Express-Session.
-* **Base de Datos**: Firebase Firestore.
-* **Seguridad**: Hashing de contraseñas con `crypto.scryptSync`.
 
+- Frontend: React 19, Vite, React Router, Axios.
+- Backend: Node.js, Express 5, Express Session, dotenv, CORS.
+- Base de datos: Firebase Firestore.
+- Seguridad: hash de contraseñas, autenticación por sesión y recuperación de credenciales.
+- Contenerización: Docker + Docker Compose.
+
+## ✅ Requisitos Previos
+
+Antes de ejecutar el proyecto, asegúrate de tener instalado:
+
+- Node.js LTS (preferentemente una versión reciente)
+- npm
+- Docker Desktop y Docker Compose (opcional, si usarás contenedores)
+- Una cuenta de Firebase con servicio de autenticación configurado
 
 ## 🚀 Instalación y Configuración
 
-### 1. Credenciales de Firebase
-Asegúrate de que el archivo `keys.json` esté ubicado en la raíz principal del proyecto (fuera de las carpetas de frontend y backend).
+### 1. Clonar y preparar el proyecto
 
-### 2. Ejecución del Proyecto
-Bash
-
-# Terminal 1: Backend
-Asegurarse de estar en \hotel-saas-2\backend y ejecutar
+```bash
+git clone <url-del-repositorio>
+cd hotel-saas-2
 ```
+
+### 2. Configurar las credenciales de Firebase
+
+El backend requiere un archivo `keys.json` en la raíz del proyecto. Ese archivo debe contener la credencial del servicio de Firebase en formato JSON.
+
+Ubicación esperada:
+
+```text
+hotel-saas-2/
+└── keys.json
+```
+
+Si prefieres apuntar a otra ruta, puedes definir la variable de entorno:
+
+```bash
+FIREBASE_KEY_PATH=/ruta/absoluta/a/keys.json
+```
+
+> El backend intenta cargar `keys.json` desde la raíz del proyecto por defecto y lo usa para inicializar `firebase-admin`.
+
+### 3. Configurar las variables de entorno del backend
+
+Crea un archivo `.env` dentro de `backend/` si deseas personalizar la configuración:
+
+```env
+PORT=3000
+KEYS=secreto_temporal_escolar
+FIREBASE_KEY_PATH=../keys.json
+```
+
+Notas:
+
+- `PORT`: puerto donde escuchará el backend.
+- `KEYS`: secreto para la sesión de Express.
+- `FIREBASE_KEY_PATH`: ruta opcional a la clave de Firebase.
+
+### 4. Instalar dependencias del backend
+
+```bash
+cd backend
 npm install
-npm install express-session
-npm install firebase-admin
-npm install cors
-npm install dotenv
-```
-
-Para arrancar el servidor ejecutar
-```
-node index
-```
-
-# Terminal 2: Frontend
-**NOTA: ES NECESARIA UNA VERSIÓN ACTUALIZADA DE NODE**
-Asegurarse de estar en \hotel-saas-2\frontend y ejecutar
-```
-npm install
-```
-
-Para arrancar el servidor ejecutar
-```
 npm run dev
 ```
 
-🔒 Características de Seguridad
-Protección de Datos: No se almacenan contraseñas en texto plano; se utiliza un sistema de Hash y Salt único por usuario.
+Comandos útiles:
 
-Integridad: Validaciones estrictas en el servidor mediante expresiones regulares para correos, teléfonos y nombres.
+```bash
+npm run dev
+npm start
+```
 
-Persistencia: Manejo de sesiones seguras que diferencian entre usuarios estándar y administradores.
+El backend quedará disponible en:
+
+```text
+http://localhost:3000
+```
+
+### 5. Instalar dependencias del frontend
+
+En otra terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+La interfaz de desarrollo se servirá en:
+
+```text
+http://localhost:5173
+```
+
+> El frontend actualmente apunta al backend en `http://localhost:3000`, por lo que ambos servicios deben ejecutarse simultáneamente en desarrollo.
+
+## 🐳 Ejecución con Docker Compose
+
+Si deseas levantar el proyecto completo con contenedores:
+
+```bash
+docker compose up --build
+```
+
+Esto levanta:
+
+- `frontend`
+- `backend`
+- `nginx`
+
+El proyecto queda expuesto por Nginx en:
+
+```text
+http://localhost
+https://localhost
+```
+
+### Volumen importante
+
+El `docker-compose.yml` monta el archivo `keys.json` en el contenedor del backend en modo de solo lectura:
+
+```yaml
+volumes:
+  - ./keys.json:/keys.json:ro
+```
+
+Por eso, `keys.json` debe existir antes de iniciar los contenedores.
+
+## 🔐 Características de Seguridad
+
+- No se almacenan contraseñas en texto plano.
+- Se usa hashing y sal por usuario.
+- Las sesiones se manejan con `express-session`.
+- La validación de datos se realiza en el backend para evitar inconsistencias en la interfaz.
+
+## 📌 Resumen rápido
+
+Si vas a correr el proyecto en modo local:
+
+```bash
+# Backend
+cd backend
+npm install
+npm run dev
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+Si vas a usar Docker:
+
+```bash
+docker compose up --build
+```
